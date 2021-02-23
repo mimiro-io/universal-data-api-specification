@@ -1,0 +1,517 @@
+<pre class='metadata'>
+Title: Universal Data API
+Shortname: uda
+Level: 1
+Status: LS
+URL: https://open.mimiro.io/specifications/universal-data-api-specification
+Editor: Graham Moore, Mimiro http://mimiro.io, graham.moore @ mimiro.no
+Repository: https://github.com/mimiro-io/universal-data-api-specification, Specification Repository
+Abstract: Specification for semantic graph data model and API for publishing, updating and querying datasets.
+Boilerplate: copyright no
+</pre>
+
+# Document Status
+
+Documents can either be a draft or a release. Numbering uses semantic versioning. Everything except major releases is backwards compatible.
+
+This document is: 0.1.0 draft.
+
+# Introduction
+
+This specification defines a semantic graph data model, its serialisation and a simple and consistent API to expose, synchronise, update and query datasets. The specification defines how a server manages and exposes a collection of datasets. A dataset consists of entities. An entity has properties and references, and can be serialised as a JSON object. Clients can request all data in a dataset or just the entities that have changed since a given point in time. As well as consuming datasests, clients can also post updates to writeable datasets.
+
+# Motivation
+
+Many different APIs with different semantics and different data representations are constantly being defined and published. This requires developers to learn about and create different clients for the different endpoints when many of the core semantics remain the same. This specification looks to generalise the solution to publishing, consuming, synchronising and updating datasets.
+
+# Background
+
+The authors of this specification have been contributors to open standards for over twenty years. Some of the direct influences on this work are SDShare, RDF Net API, ISO Topic Maps Data Model, RDF, and OData.
+
+# Entity graph Data Model
+
+The Entity graph Data Model is the meta-model that is used to describe all data. It has a formal definition and a JSON serialisation. This data model is introduced to provide a common standard for representing data. A graph data model was chosen for its flexibility and wide utility in representing data of many shapes.
+
+## The Entity Graph Data Model
+
+The data model consists of entities. An entity is a single data object that represents some subject, some thing. An entity has identity, properties and references. Property values are primarily literals, or a list of values. References are typed references to other entities. The identity of every entity is described using a URI. All property and reference types are also described using URIs. An entity, or list of entities, can also be the value of a property. 
+
+The model is defined formally as:
+
+```ebnf
+entity               := { id, deleted, recorded, properties, references }
+
+id                   := xsd:uri
+
+properties           := [ key-val-pair* ]
+
+deleted              := xsd:boolean
+
+references           := [ key-ref-pair* ]
+
+key-val-pair         := xsd:uri , value | [ value ]
+
+key-ref-pair         := xsd:uri , xsd:uri | [ xsd:uri ]
+
+value                := child-entity | xsd:string |
+                        xsd:int | xsd:datetime | xsd:uri | xsd:double | xsd:float
+
+child-entity         := { id, properties, references } | { properties, references }
+```
+
+## JSON Serialisation
+
+The JSON serialisation of an entity is simple and consistent. Each entity is serialised as a JSON Object, The id, deleted and recorded properties are top level keys in the JSON object, while the Properties and References are serialised as values of the `props` and `refs` keys respectively.
+
+The following example shows an entity with no properties or references.
+
+```json
+{
+    "id" : "http://data.mimiro.io/people/bob"
+}
+```
+
+Properties are serialised as a JSON object with multiple keys. The values of these keys are either a single value or a list of values:
+
+```json
+{
+    "id" : "http://data.mimiro.io/people/bob",
+    "props" : {
+        "http://data.mimiro.io/people/name" : "bob",
+        "http://data.mimiro.io/people/nicknames" : [ "bobby", "bobs" ]
+    }
+}
+```
+
+By default the built in JSON data types are used for literals. Sometimes, however, it is necessary to be very specific about the data type for a literal value. In these cases the literal value can be prefixed with `xsd:xxx:`, where `xxx` is the specific xsd data type.
+
+The following example is semantically equivalent to the previous example.
+
+```json
+{
+    "id" : "http://data.mimiro.io/people/bob",
+    "props" : {
+        "http://data.mimiro.io/people/name" : "bob",
+        "http://data.mimiro.io/people/nicknames" : 
+            [ "xsd:string:bobby", 
+              "xsd:string:bobs" ]
+    }
+}
+```
+
+References are serialised as a JSON object with multiple keys. Values of these keys are either a single value or a list of values:
+
+```json
+{
+    "id" : "http://data.mimiro.io/people/bob",
+    "refs" : {
+        "http://data.mimiro.io/people/lives-in" : "http://data.mimiro.io/places/oslo",
+        "http://data.mimiro.io/people/friends" : 
+                [ "http://data.mimiro.io/people/colin", 
+                  "http://data.mimiro.io/people/james" ]
+    }
+}
+```
+
+A deleted entity is represented as:
+
+```json
+{
+    "id" : "http://data.mimiro.io/people/bob",
+    "deleted" : True
+}
+```
+
+With deleted objects, it is also permissable to include all the properties and references at the time the entity was deleted.
+
+## Context 
+
+The use of URIs for the identity of entities and property types makes the JSON verbose. To mitigate this, a context can be used. 
+
+A context can be provided as as the first object in an array of entities. The context defines the mappings between short prefixes and full URIs. This follows the ideas in (https://www.w3.org/TR/curie/).  
+
+A context is defined as a JSON object. The object has one key called `id`, whose value MUST be `@context`.
+
+Another key `namespaces` MUST have a JSON object as the value. Each key pair in the namespaces object is an expansion definition.
+
+The key '_' is the default expansion and used when no prefix is provided for an id value, a property key, or a reference key.
+
+The followig context defines the default expansion and one expansion for the prefix `people`.
+
+```json
+{
+    "id" : "@context",
+    "namespaces" : {
+        "_" : "http://data.mimiro.io/properties/"
+        "people" : "http://data.mimiro.io/people/"
+    } 
+}
+```
+
+A context is used as part of an array of entities:
+
+```json
+[
+    {
+        "id" : "@context",
+        "namespaces" : {
+            "_" : "http://data.mimiro.io/properties/".
+            "people" : "http://data.mimiro.io/people/"
+        } 
+    },
+
+    {
+        "id" : "people:bob",
+        "props" : {
+            "name" : "bob"
+        }
+    }
+]
+
+```
+
+The expanded version of the above entity with given namespaces context is:
+
+
+```
+    {
+        "id" : "http://data.mimiro.io/people/bob",
+        "props" : {
+            "http://data.mimiro.io/properties/name" : "bob"
+        }
+    }
+```
+
+# API
+
+The API is defined in terms of a RESTful API. A server implementing the api MUST expose the following endpoints and implement the described semantics. The API uses a fixed URI structure (there are dynamic values within) to expose resources. 
+
+## Dataset List
+
+The dataset list is accessed as follows:
+
+```http
+GET /datasets
+```
+
+The get dataset list request returns a list of dataset objects. Each dataset is represented as a single JSON object inside a JSON array. The JSON object MUST have the following property:
+
+: name
+:: the locally unique identifier of the dataset. There MUST be only one JSON object with the same name within the array of dataset objects.
+
+A server MAY include additional properties in each JSON object.
+
+The following example provides a normative example of a request / response interaction.
+
+```JSON
+GET /datasets
+
+returns ==>
+200 OK
+
+[
+    {
+        "name" : "people"
+    },
+    {
+        "name" : "products",
+    }
+]
+```
+
+## Dataset Information
+
+The dataset is accessed as follows:
+
+```http
+GET /datasets/{dataset_name}
+```
+
+Each dataset can publish information about itself. Each dataset resource returns information about the dataset as a single JSON object.
+
+The JSON object has the following properties:
+
+: name (required)
+:: dataset name
+: since (optional)
+:: Indicates if this dataset supports the since query parameter or always returns the complete dataset. If omitted client MUST assume false.
+: lastModified (optional)
+:: A date time of when the contents of the dataset last changed in UTC ISO date format. 
+
+The following example provides a normative example of a request / response interaction.
+
+```json
+GET /datasets/people
+
+returns
+
+{
+    "name" : "People",
+    "since" : true,
+    "lastModified" : "12-03-2020T00:00:00Z"
+}
+```
+
+A server MAY include additional properties in each JSON object.
+
+## Dataset Changes 
+
+The dataset changes are accessed as follows:
+
+```http
+GET /datasets/{dataset_name}/changes?since={since_token}
+```
+
+The changes endpoint provides a stream of entities that have changed in the dataset. If a since token is provided then the set of entities consists of only those entities that have changed after after the time indicated by this token. A change includes any entity that has been created, updated or deleted in the underlying datasource. The absense of a since token indicates the server MUST return all entities.
+
+: dataset_name
+:: path parameter defines the identity of the dataset.
+
+: since
+:: optional query parameter is a base64 encoded value that the server understands. 
+
+The response MAY contain the 'universal-data-api-fullsync' HTTP header. If this is set to true then the client SHOULD delete all local data and make a new request to the server with no since token. The data provided by the subsequent request should be consider the new local data. 
+
+The response body is an array of JSON Objects. The first object in the array MUST be a context, the following objects are entities serialised to JSON as described in the data model, the last entity MAY be a continuation object. 
+
+The following example is a normative request / response interaction.
+
+```json
+GET /datasets/people/changes?since=[since_token]
+
+returns ==>
+200 OK
+
+[
+    {
+        "id" : "@context",
+        "namespaces" : {
+            "_" : "http://data.mimiro.io/people/".
+        } 
+    },
+    {
+        "id" : "person-42",
+        "props" : {
+            "name" : "bob",
+            "title" : "mr",
+            "phone" : "+150050444"
+        }
+    },
+    {
+        "id" : "person-43",
+        "deleted" : true
+    }
+]
+```
+
+The server is responsible for returning continuation tokens. These tokens can be stored and used by clients as values of subsequence since query parameter. A server returns a continuation token as a special json object in the response body. 
+
+A server MAY inject as many continuation tokens as it wants to in a response. Typically a server will return one token at the end of the response. 
+
+A continuation token is a JSON object that MUST have an 'id' key whose value MUST be '@continuation'. In addition, the JSON object MUST contain the key 'token' and the value is a base64 encoded string that the server can use as a since query parameter.
+
+The following example is a normative request / response interaction.
+
+```json
+GET /datasets/people/changes
+
+returns ==>
+200 OK
+
+[
+    {
+        "id" : "@context",
+        "namespaces" : {
+            "_" : "http://data.mimiro.io/people/".
+        } 
+    },
+    {
+        "id" : "person-42",
+        "props" : {
+            "name" : "bob",
+            "title" : "mr",
+            "phone" : "+150050444"
+        }
+    },
+    {
+        "id" : "@continuation",
+        "token" : "sfbbfsbfjskjfsjk="
+    }
+]
+
+A subsequent client request would use the token as follows:
+
+GET /datasets/people/changes?since=sfbbfsbfjskjfsjk=
+```
+
+## Dataset entities
+
+The entities endpoint supports both read and update of the entities in a dataset. Servers are free to restrict access to datasets with security. The entities endpoint returns the latest set of entities in a dataset (this can of course be different from changes). 
+
+### GET 
+
+The dataset entities are accessed as follows:
+
+```http
+GET /datasets/{dataset_name}/entities?from={since_token}
+```
+
+The GET request has a path parameter of the dataset name and optionally a query parameter, from. The from parameter is used in cases where the server returns a continuation token as part of a response - typically to support paging. 
+
+The response from a GET operation on the entities of a dataset returns an array of entity JSON objects. The first object MUST be a context, followed by any number of entities serialised according to the rules above, and optionally finishing with a continuation object.
+
+The following example is a normative request / response interaction.
+
+```json
+GET /datasets/people/entities
+
+returns ==>
+200 OK
+
+[
+    {
+        "id" : "@context",
+        "namespaces" : {
+            "_" : "http://data.mimiro.io/people/".
+        } 
+    },
+    {
+        "id" : "person-42",
+        "props" : {
+            "name" : "bob",
+            "title" : "mr",
+            "phone" : "+150050444"
+        }
+    }
+
+    ... more entities
+]
+```
+
+If the server wishes to serve pages of entities then it can use a continuation token:
+
+```json
+GET /datasets/people/entities
+
+returns ==>
+200 OK
+
+[
+    {
+        "id" : "@context",
+        "namespaces" : {
+            "_" : "http://data.mimiro.io/people/".
+        } 
+    },
+    {
+        "id" : "person-42",
+        "props" : {
+            "name" : "bob",
+            "title" : "mr",
+            "phone" : "+150050444"
+        }
+    }
+
+    ... more entities,
+
+    {
+        "id" : "@continuation",
+        "token" : "xxxx-yyyyy"
+    }
+]
+```
+
+Clients can use the token in subsequent requests to page through results. 
+
+```
+GET /datasets/people/entities?from=xxxx-yyyyy
+```
+
+### POST
+
+It is also possible to POST changes to the entities endpoint. The changes can either be incremental or a full reload. 
+
+The request URL is in the form:
+
+```
+/datasets/{dataset_name}/entities
+```
+
+The following POST request is used to send incremental changes to the server. The body of the request is a JSON array. The first object in the array MUST be a context object. The following JSON objects are the entities to be updated, added or deleted. 
+
+```json
+Example body:
+[
+    {
+        "id" : "@context",
+        "namespaces" : {
+            "_" : "http://data.mimiro.io/properties/",
+            "people" : "http://data.mimiro.io/people/"
+        }
+    },
+    {
+        "id" : "people:42",
+        "props" : {
+            "name" : "bob",
+            "title" : "mr",
+            "phone" : "+150050444"
+        }
+    },
+    {
+        "id" : "people:43",
+        "deleted" : true
+    }
+]
+
+```
+
+To send a full sync requires the use of the following headers used in a specific way. The headers are:
+
+```
+universal-data-api-full-sync-start : bool
+
+universal-data-api-full-sync-end : bool
+
+universal-data-api-full-sync-id : string
+```
+
+For a client to force a remote dataset to consider multiple requests as the full dataset to be reloaded it should send the above payload as one or more requests:
+
+1. Send the body along with the HTTP header `universal-data-api-full-sync-id`. The value of this header is some generated id that is used for the duration of the full sync. The HTTP header `universal-data-api-full-sync-start` should also be included and have a value of `true`.
+2. Send multiple requests containing entities and include the HTTP header `universal-data-api-full-sync-id`, whose value is the same as that sent in the first request.
+3. When all entities have been sent or the client knows that this is the last request; send the http headers `universal-data-api-full-sync-end` value `true`, and `universal-data-api-full-sync-id` with the same value as used in all previous requests.
+
+# Security
+
+All communication MUST be over TLS via https endpoints. 
+
+It is recommended that JSON Web Tokens(JWT) are used for control of access to different datasets and permissions.
+
+How these tokens are acquired is implementation and service specific.
+
+# Common Patterns
+
+## Conveying Type
+
+By default all entities are untyped. To convey the type of an entity there is a convention that defines a reference between the entity and its type. The reference type used is `http://www.w3.org/1999/02/22-rdf-syntax-ns#type`.
+
+```json
+[
+    {
+        "id" : "@context",
+        "namespaces" : {
+            "rdf" : "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+            "types" : "http://data.example.org/types/",
+            "people" : "http://data.mimiro.io/people/"
+        }
+    },
+
+    {
+        "id" : "people:bob",
+        "refs" : {
+            "rdf:type" : "types:Person"
+        }
+    }
+]
+```
+
