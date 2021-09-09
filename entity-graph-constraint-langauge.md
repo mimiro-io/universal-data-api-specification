@@ -1,6 +1,6 @@
-# Entity Constraint Language
+# Entity Graph Constraint Language
 
-The Entity Constraint Language is a vocabulary for expressing constraints over instances of the Entity Data Model [1]. As well as the vocabulary there are validation semantics connected with each constraint class. 
+The Entity Graph Constraint Language is a vocabulary for expressing constraints over instances of the Entity Graph Data Model [1]. As well as the vocabulary there are validation semantics connected with each constraint class. 
 
 # Bootstrapping
 
@@ -333,15 +333,6 @@ for entityInstance in instancesOfClass {
 }
 ```
 
-## Reference Restriction Constraint
-
-The reference restriction constraint is used to restrict allowed the allowed classes of related entities. e.g. an org unit can be part of another org unit, but a restriction could say that a group can only be part of a department, and a department can only be part of a company, and a company can only be part of a conglomorate. This allows the reuse of the reference type but refines the constraints on subclass. 
-
-To do: do we need this?
-
-```javascript
-```
-
 ## Property Value Constraint
 
 The property value constraint is used to constrain the value of a property. e.g. that a string value must match some regular expression or that a integer value must be in some range. 
@@ -349,48 +340,110 @@ The property value constraint is used to constrain the value of a property. e.g.
 The data model for this constraint defines:
 - the (optional) entity class whose instances must meet the constraint
 - the property class being constrained
-- the (optional) min value of allowed on an instance
-- the max cardinality of properties of the property class that are allowed on an instance
+- the (optional) min value allowed
+- the (optional) max value allowed
+- the (optional) regular expression that the value must match
 
 ```json
 {
     "id" : "schema:constraint-1",
     "refs" : {
-        "rdf:type" : "constraint:PropertyConstraint",
+        "rdf:type" : "constraint:PropertyValueConstraint",
         "constraint:applies-to-class" : "$CLASS",
-        "constraint:reference-class" : "$REFERENCE_CLASS",
-        "constraint:referenced-entity-class" : "$REFERENCED_ENTITY_CLASS"
+        "constraint:property-class" : "$PROPERTY_CLASS",
     },
     "props" : {
-        "constraint:minCard" : "$MIN_CARD",
-        "constraint:maxCard" : "$MAX_CARD"       
+        "constraint:property-value-min" : "$VALUE_MIN",
+        "constraint:property-value-max" : "$VALUE_MAX",
+        "constraint:property-value-regexp" : "$VALUE_REGEXP"
     }
 }
 ```
 
+The formal semantics for this constraint class are defined in terms of the evaluation functions and bind the variable from the constraint instance as parameters.  
 
-## One Of Reference Constraint
+``` javascript
 
-The one of reference constraint constrains the allowed set of entities that can be referenced by instances of a given class with a given property class. e.g. It is used as mechanism to restrict the set of possible instances to a subset of the complete range of entities of a given class.
+// get the instances of the Entity Class indentified in the constraint instance
+let instancesOfClass = hop($CLASS, "rdf:type", true)
 
+// for each instance of the specified class get the properties of the specified property class and assert all values of the constrained property type have a value that meets the value constraints.
+for entityInstance in instancesOfClass {
+    let propertiesOfSpecifiedType = properties(entityInstance, $PROPERTY_CLASS)
+    let propertiesLength = len(propertiesOfSpecifiedType)
+
+    for value in propertiesOfSpecifiedType {
+        if ($VALUE_MIN) {
+            assert_gteq(value, $VALUE_MIN)
+        }
+
+        if ($VALUE_MAX) {
+            assert_lteq(value, $VALUE_MAX)
+        }
+
+        if ($VALUE_REGEXP) {
+            assert_regexp_match(value, $VALUE_REGEXP)
+        }
+    }
+}
+
+```
 
 ## Query Constraint
 
-The entity query constraint takes a EQL (Entity Query Language) expression, evaluates it and assume that any entities returned are in violation of the constraint. 
+The entity query constraint takes a EGQL (Entity Graph Query Language) expression, evaluates it and assume that any entities returned are in violation of the constraint. NOTE: This is waiting on EQL being finalised but the constraint class can still be defined. 
 
+The data model for this constraint defines:
+- the EQL query to be evaluated
+
+```json
+{
+    "id" : "$CID",
+    "refs" : {
+        "rdf:type" : "constraint:QueryConstraint"
+    },
+    "props" : {
+        "constraint:query" : "$QUERY"
+    }
+}
+```
+
+The formal semantics for this constraint class are defined in terms of the evaluation functions and bind the variable from the constraint instance as parameters.  
+
+``` javascript
+
+let entities = query($query)
+for e in entities {
+    new ConstraintViolation($CID, e)
+}
+
+```
 
 ## Application Constraint
 
-An application constraint is an application specific non-standaised constraint that is executed by the validation engine and returns instances of type constraint viloation.
+An application constraint class is an application specific non-standardised constraint that is executed by the validation engine and returns instances of type constraint viloation. While of course the actual validation cannot be interchanged the idea is that at least it is described and also allows for extension through the creation of common constraints that are given identity.
 
+The data model for this constraint defines:
+- the identifier of the rule to be evaluated
 
-# Examples
+```json
+{
+    "id" : "$CID",
+    "refs" : {
+        "rdf:type" : "constraint:ApplicationConstraint",
+        "constraint:rule" : "$RULE"
+    },
+    "props" : {
+        "constraint:description" : "$DESCRIPTION"
+    }
+}
+```
 
-This section is informative and illustrates how to use the constraint classes for common data modelling problems.
+The formal semantics for this constraint class are defined such that the system must return evaluate the rule identified by $RULE against an Entity Graph store and return an array of constraint violation instances.
 
 # Compliance
 
-TODO: Take a set of small tests cases with input in terms of the model instance and the constraint model instance and define the expected outputs in terms of violation data structures.
+TODO
 
 # References
 
