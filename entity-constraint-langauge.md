@@ -188,7 +188,7 @@ let instanceCount = len(instancesOfClass)
 assert_true(instanceCount, 0)
 ```
 
-## Property Constaint
+## Property Constraint
 
 Instances of the `Property Constraint` class are used to ensure that an instance of an Entity Class contains the correct number of the specified properties. e.g. that a person must have a name and a date of birth.
 
@@ -232,7 +232,7 @@ for entityInstance in instancesOfClass {
 
 ## Property Value Type Constraint
 
-Instances of the `Property Value TYpe Constraint` class are used to ensure that an the value of a given property class on a given entity class must be of a given type. e.g. date of birth on person must be of type DateTime.
+Instances of the `Property Value Type Constraint` class are used to ensure that an the value of a given property class on a given entity class must be of a given type. e.g. date of birth on person must be of type DateTime.
 
 The data model for this constraint defines:
 - the entity class whose instances must meet the constraint
@@ -341,6 +341,33 @@ To do: do we need this?
 
 ```javascript
 ```
+
+## Property Value Constraint
+
+The property value constraint is used to constrain the value of a property. e.g. that a string value must match some regular expression or that a integer value must be in some range. 
+
+The data model for this constraint defines:
+- the (optional) entity class whose instances must meet the constraint
+- the property class being constrained
+- the (optional) min value of allowed on an instance
+- the max cardinality of properties of the property class that are allowed on an instance
+
+```json
+{
+    "id" : "schema:constraint-1",
+    "refs" : {
+        "rdf:type" : "constraint:PropertyConstraint",
+        "constraint:applies-to-class" : "$CLASS",
+        "constraint:reference-class" : "$REFERENCE_CLASS",
+        "constraint:referenced-entity-class" : "$REFERENCED_ENTITY_CLASS"
+    },
+    "props" : {
+        "constraint:minCard" : "$MIN_CARD",
+        "constraint:maxCard" : "$MAX_CARD"       
+    }
+}
+```
+
 
 ## One Of Reference Constraint
 
