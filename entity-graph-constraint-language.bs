@@ -1,6 +1,19 @@
+<pre class='metadata'>
+Title: Entity Graph Constraint Language
+Shortname: uda
+Level: 1
+Status: LS
+URL: https://open.mimiro.io/specifications/entity-graph-data-model
+Editor: Graham Moore, graham.moore @ mimiro.no
+Repository: https://github.com/mimiro-io/universal-data-api-specification, Specification Repository
+Abstract: Specification for entity graph constraint language. A data model and validation semantics for constraining instances of the Entity Graph Data Model.
+Boilerplate: copyright no
+</pre>
+
+
 # Entity Graph Constraint Language
 
-The Entity Graph Constraint Language is a vocabulary for expressing constraints over instances of the Entity Graph Data Model [1]. As well as the vocabulary there are validation semantics connected with each constraint class. 
+The Entity Graph Constraint Language is a vocabulary for expressing constraints over instances of the Entity Graph Data Model [1]. The constraints are defined as number of constraint classes, and along with each constraint class are formal validation semantics. The validation of constraints is defined in terms of the formal semantics and the result of validation is a set of violation entities that are instances of the constraint violation class. To aid in describing the validation semantics a number of logical functions are defined along with a number of base identifiers. These base identifiers are used to bootstrap the type system. 
 
 # Bootstrapping
 
@@ -61,17 +74,16 @@ The following example shows how to express that the `Person` class is a subclass
 
 The `subClassOf` relationship described above is transitive in nature. Such that if:
 
-```
+```ebnf
 a rdf:type B 
 
-amd
+and
 
 B uda:subClassOf C
 
 it follows (or is entailed) that:
 
 a rdf:type C is also true.
-
 ```
 
 This means that constraints defined as applying to any super class also apply to any instance of subclasses.
@@ -80,7 +92,7 @@ This means that constraints defined as applying to any super class also apply to
 
 Validation of a entity model instance is formally defined as:
 
-```
+```ebnf
 Given:
 
 i := entity model instance
@@ -133,24 +145,26 @@ let datatype = property_datatype(value)
 
 Based on XML primitive datatypes the result will be a URI of one of the following:
 
-- http://www.w3.org/2001/XMLSchema#int
-- http://www.w3.org/2001/XMLSchema#duration
-- http://www.w3.org/2001/XMLSchema#dateTime
-- http://www.w3.org/2001/XMLSchema#time
-- http://www.w3.org/2001/XMLSchema#date
-- http://www.w3.org/2001/XMLSchema#boolean
-- http://www.w3.org/2001/XMLSchema#base64Binary
-- http://www.w3.org/2001/XMLSchema#hexBinary
-- http://www.w3.org/2001/XMLSchema#float
-- http://www.w3.org/2001/XMLSchema#double
-- http://www.w3.org/2001/XMLSchema#decimal
-- http://www.w3.org/2001/XMLSchema#anyURI
-- http://www.w3.org/2001/XMLSchema#string
-- http://www.w3.org/2001/XMLSchema#gYearMonth
-- http://www.w3.org/2001/XMLSchema#gYear
-- http://www.w3.org/2001/XMLSchema#gMonthDay
-- http://www.w3.org/2001/XMLSchema#gDay
-- http://www.w3.org/2001/XMLSchema#gMonth
+```json
+http://www.w3.org/2001/XMLSchema#int
+http://www.w3.org/2001/XMLSchema#duration
+http://www.w3.org/2001/XMLSchema#dateTime
+http://www.w3.org/2001/XMLSchema#time
+http://www.w3.org/2001/XMLSchema#date
+http://www.w3.org/2001/XMLSchema#boolean
+http://www.w3.org/2001/XMLSchema#base64Binary
+http://www.w3.org/2001/XMLSchema#hexBinary
+http://www.w3.org/2001/XMLSchema#float
+http://www.w3.org/2001/XMLSchema#double
+http://www.w3.org/2001/XMLSchema#decimal
+http://www.w3.org/2001/XMLSchema#anyURI
+http://www.w3.org/2001/XMLSchema#string
+http://www.w3.org/2001/XMLSchema#gYearMonth
+http://www.w3.org/2001/XMLSchema#gYear
+http://www.w3.org/2001/XMLSchema#gMonthDay
+http://www.w3.org/2001/XMLSchema#gDay
+http://www.w3.org/2001/XMLSchema#gMonth
+```
 
 # Constraint Data Model and Validation Semantics
 
