@@ -17,7 +17,34 @@ The Entity Graph Constraint Language is a vocabulary for expressing constraints 
 
 # Bootstrapping
 
-To bootstrap the constraint classes and the evaluation semantics the following base formalisms are defined.
+To bootstrap the constraint classes and the evaluation semantics the following base formalisms and identifiers are defined.
+
+## The EGCL Base Namespace
+
+All constraint classes and the data model that comprises the constraints are defined using the entity graph data model. A key element of that is the use of URIs to denote things.
+
+The base URI from which all other EGCL identifiers are derived is defined as follows:
+
+`http://data.mimiro.io/egcl/`
+
+In this document in cases where an entity data model context is not defined the prefix:
+
+`egcl:`
+
+Should be considered as the namespace prefix that expands to the base URI `http://data.mimiro.io/egcl/`.
+
+As an example:
+
+```
+"rdf:type" : "egcl:EntityClass"
+```
+
+Would be expanded to:
+
+```
+"rdf:type" : "http://data.mimiro.io/egcl/EntityClass"
+```
+
 
 ## The Type Relationship
 
@@ -36,20 +63,20 @@ The following example shows an entity connected to its EntityType via the `rdf:t
 
 ## Entity Class
 
-To indicate that an entity is an Entity Class then it MUST have an `rdf:type` reference whose value is `uda:EntityClass` .
+To indicate that an entity is an Entity Class then it MUST have an `rdf:type` reference whose value is `egcl:EntityClass` .
 
 ```json
 {
     "id" : "http://example.org/schema/Person",
     "refs" : {
-        "rdf:type" : "uda:EntityClass"
+        "rdf:type" : "egcl:EntityClass"
     }        
 }
 ```
 
 ## SubClass Relationship
 
-To convey that an EntityClass is a subclass of another entity class the relationship type `uda:subClassOf` must be used.
+To convey that an EntityClass is a subclass of another entity class the relationship type `egcl:subClassOf` must be used.
 
 The following example shows how to express that the `Person` class is a subclass of the `Thing` class.
 
@@ -57,15 +84,15 @@ The following example shows how to express that the `Person` class is a subclass
 {
     "id" : "http://example.org/schema/Thing",
     "refs" : {
-        "rdf:type" : "uda:EntityClass"
+        "rdf:type" : "egcl:EntityClass"
     }        
 }
 ,
 {
     "id" : "http://example.org/schema/Person",
     "refs" : {
-        "rdf:type" : "uda:EntityClass",
-        "uda:subClassOf" : "http://example.org/schema/Thing"
+        "rdf:type" : "egcl:EntityClass",
+        "egcl:subClassOf" : "http://example.org/schema/Thing"
     }        
 }
 ```
@@ -79,7 +106,7 @@ a rdf:type B
 
 and
 
-B uda:subClassOf C
+B egcl:subClassOf C
 
 it follows (or is entailed) that:
 
@@ -185,8 +212,8 @@ The entity model representation of this constraint is as follows and indicates p
 {
     "id" : "schema:constraint-0",
     "refs" : {
-        "rdf:type" : "constraint:IsAbstractConstraint",
-        "constraint:applies-to-class" : "$A"
+        "rdf:type" : "egcl:IsAbstractConstraint",
+        "egcl:entityClass" : "$A"
     }
 }
 
@@ -216,13 +243,13 @@ The data model for this constraint defines:
 {
     "id" : "schema:constraint-1",
     "refs" : {
-        "rdf:type" : "constraint:PropertyConstraint",
-        "constraint:applies-to-class" : "$CLASS",
-        "constraint:property-class" : "$PROPERTY_CLASS"
+        "rdf:type" : "egcl:PropertyConstraint",
+        "egcl:entityClass" : "$CLASS",
+        "egcl:propertyClass" : "$PROPERTY_CLASS"
     },
     "props" : {
-        "constraint:minCard" : "$MIN_CARD",
-        "constraint:maxCard" : "$MAX_CARD"       
+        "egcl:minCard" : "$MIN_CARD",
+        "egcl:maxCard" : "$MAX_CARD"       
     }
 }
 ```
@@ -244,7 +271,7 @@ for entityInstance in instancesOfClass {
 }
 ```
 
-## Property Value Type Constraint
+## Property Value DataType Constraint
 
 Instances of the `Property Value Type Constraint` class are used to ensure that an the value of a given property class on a given entity class must be of a given type. e.g. date of birth on person must be of type DateTime.
 
@@ -257,10 +284,10 @@ The data model for this constraint defines:
 {
     "id" : "schema:constraint-1",
     "refs" : {
-        "rdf:type" : "constraint:PropertyValueConstraint",
-        "constraint:applies-to-class" : "$CLASS",
-        "constraint:property-class" : "$PROPERTY_CLASS",
-        "constraint:datatype" : "$DATA_TYPE"
+        "rdf:type" : "egcl:PropertyValueDataTypeConstraint",
+        "egcl:entityClass" : "$CLASS",
+        "egcl:propertyClass" : "$PROPERTY_CLASS",
+        "egcl:datatype" : "$DATA_TYPE"
     }
 }
 ```
@@ -284,8 +311,6 @@ for entityInstance in instancesOfClass {
 }
 ```
 
-TODO: add violation data structures as a result of failed results.
-
 ## Reference Constraint
 
 Instances of the `Reference Constraint` class are used to ensure that an instance of an Entity Class contains the correct number of the specified references of a given type. e.g. that a person must have a reference of type `mother` and  constraint the type of the related entity to be `Person`.
@@ -301,14 +326,14 @@ The data model for this constraint defines:
 {
     "id" : "schema:constraint-1",
     "refs" : {
-        "rdf:type" : "constraint:PropertyConstraint",
-        "constraint:applies-to-class" : "$CLASS",
-        "constraint:reference-class" : "$REFERENCE_CLASS",
-        "constraint:referenced-entity-class" : "$REFERENCED_ENTITY_CLASS"
+        "rdf:type" : "egcl:ReferenceConstraint",
+        "egcl:entityClass" : "$CLASS",
+        "egcl:referenceClass" : "$REFERENCE_CLASS",
+        "egcl:referencedEntityClass" : "$REFERENCED_ENTITY_CLASS"
     },
     "props" : {
-        "constraint:minCard" : "$MIN_CARD",
-        "constraint:maxCard" : "$MAX_CARD"       
+        "egcl:minCard" : "$MIN_CARD",
+        "egcl:maxCard" : "$MAX_CARD"       
     }
 }
 ```
@@ -362,14 +387,14 @@ The data model for this constraint defines:
 {
     "id" : "schema:constraint-1",
     "refs" : {
-        "rdf:type" : "constraint:PropertyValueConstraint",
-        "constraint:applies-to-class" : "$CLASS",
-        "constraint:property-class" : "$PROPERTY_CLASS",
+        "rdf:type" : "egcl:PropertyValueConstraint",
+        "egcl:entityClass" : "$CLASS",
+        "egcl:propertyClass" : "$PROPERTY_CLASS",
     },
     "props" : {
-        "constraint:property-value-min" : "$VALUE_MIN",
-        "constraint:property-value-max" : "$VALUE_MAX",
-        "constraint:property-value-regexp" : "$VALUE_REGEXP"
+        "egcl:minValue" : "$VALUE_MIN",
+        "egcl:maxValue" : "$VALUE_MAX",
+        "egcl:regexp"   : "$VALUE_REGEXP"
     }
 }
 ```
@@ -414,10 +439,10 @@ The data model for this constraint defines:
 {
     "id" : "$CID",
     "refs" : {
-        "rdf:type" : "constraint:QueryConstraint"
+        "rdf:type" : "egcl:QueryConstraint"
     },
     "props" : {
-        "constraint:query" : "$QUERY"
+        "egcl:query" : "$QUERY"
     }
 }
 ```
@@ -444,11 +469,11 @@ The data model for this constraint defines:
 {
     "id" : "$CID",
     "refs" : {
-        "rdf:type" : "constraint:ApplicationConstraint",
-        "constraint:rule" : "$RULE"
+        "rdf:type" : "egcl:ApplicationConstraint",
+        "egcl:rule" : "$RULE"
     },
     "props" : {
-        "constraint:description" : "$DESCRIPTION"
+        "egcl:description" : "$DESCRIPTION"
     }
 }
 ```
