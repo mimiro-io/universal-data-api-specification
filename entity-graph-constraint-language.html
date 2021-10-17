@@ -2008,7 +2008,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Entity Graph Constraint Language</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Living Standard, <time class="dt-updated" datetime="2021-10-13">13 October 2021</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Living Standard, <time class="dt-updated" datetime="2021-10-16">16 October 2021</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -2056,11 +2056,10 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
      <ol class="toc">
       <li><a href="#isabstract-constraint-class"><span class="secno">5.1</span> <span class="content">IsAbstract Constraint Class</span></a>
       <li><a href="#property-constraint"><span class="secno">5.2</span> <span class="content">Property Constraint</span></a>
-      <li><a href="#property-value-datatype-constraint"><span class="secno">5.3</span> <span class="content">Property Value DataType Constraint</span></a>
-      <li><a href="#reference-constraint"><span class="secno">5.4</span> <span class="content">Reference Constraint</span></a>
-      <li><a href="#property-value-constraint"><span class="secno">5.5</span> <span class="content">Property Value Constraint</span></a>
-      <li><a href="#query-constraint"><span class="secno">5.6</span> <span class="content">Query Constraint</span></a>
-      <li><a href="#application-constraint"><span class="secno">5.7</span> <span class="content">Application Constraint</span></a>
+      <li><a href="#reference-constraint"><span class="secno">5.3</span> <span class="content">Reference Constraint</span></a>
+      <li><a href="#property-value-constraint"><span class="secno">5.4</span> <span class="content">Property Value Constraint</span></a>
+      <li><a href="#query-constraint"><span class="secno">5.5</span> <span class="content">Query Constraint</span></a>
+      <li><a href="#application-constraint"><span class="secno">5.6</span> <span class="content">Application Constraint</span></a>
      </ol>
     <li><a href="#compliance"><span class="secno">6</span> <span class="content">Compliance</span></a>
     <li><a href="#references"><span class="secno">7</span> <span class="content">References</span></a>
@@ -2219,7 +2218,7 @@ h<c- kc>tt</c->p<c- p>:</c->//www.w<c- mf>3.</c->org/<c- mi>2001</c->/XMLSchema#
 assert_true<c- p>(</c->instanceCount<c- p>,</c-> <c- mf>0</c-><c- p>)</c->
 </pre>
    <h3 class="heading settled" data-level="5.2" id="property-constraint"><span class="secno">5.2. </span><span class="content">Property Constraint</span><a class="self-link" href="#property-constraint"></a></h3>
-   <p>Instances of the `Property Constraint` class are used to ensure that an instance of an Entity Class contains the correct number of the specified properties. e.g. that a person must have a name and a date of birth.</p>
+   <p>Instances of the `Property Constraint` class are used to ensure that an instance of an Entity Class contains the correct number of the specified properties, and the allowed data type for values of these properties. e.g. that a person must have a name and a date of birth and values of it must be of data type xsd:DateTime.</p>
    <p>The data model for this constraint defines:</p>
    <ul>
     <li data-md>
@@ -2230,17 +2229,20 @@ assert_true<c- p>(</c->instanceCount<c- p>,</c-> <c- mf>0</c-><c- p>)</c->
      <p>the min cardinality of properties of the property class that are allowed on an instance</p>
     <li data-md>
      <p>the max cardinality of properties of the property class that are allowed on an instance</p>
+    <li data-md>
+     <p>the required data type of the value of the constrained property</p>
    </ul>
 <pre class="language-json highlight"><c- p>{</c->
     <c- f>"id"</c-> <c- p>:</c-> <c- u>"schema:constraint-1"</c-><c- p>,</c->
     <c- f>"refs"</c-> <c- p>:</c-> <c- p>{</c->
         <c- f>"rdf:type"</c-> <c- p>:</c-> <c- u>"egcl:PropertyConstraint"</c-><c- p>,</c->
         <c- f>"egcl:entityClass"</c-> <c- p>:</c-> <c- u>"$CLASS"</c-><c- p>,</c->
-        <c- f>"egcl:propertyClass"</c-> <c- p>:</c-> <c- u>"$PROPERTY_CLASS"</c->
+        <c- f>"egcl:propertyClass"</c-> <c- p>:</c-> <c- u>"$PROPERTY_CLASS"</c-><c- p>,</c->
+        <c- f>"egcl:datatype"</c-> <c- p>:</c-> <c- u>"$DATA_TYPE"</c->       
     <c- p>},</c->
     <c- f>"props"</c-> <c- p>:</c-> <c- p>{</c->
         <c- f>"egcl:minCard"</c-> <c- p>:</c-> <c- u>"$MIN_CARD"</c-><c- p>,</c->
-        <c- f>"egcl:maxCard"</c-> <c- p>:</c-> <c- u>"$MAX_CARD"</c->       
+        <c- f>"egcl:maxCard"</c-> <c- p>:</c-> <c- u>"$MAX_CARD"</c->
     <c- p>}</c->
 <c- p>}</c->
 </pre>
@@ -2254,46 +2256,14 @@ assert_true<c- p>(</c->instanceCount<c- p>,</c-> <c- mf>0</c-><c- p>)</c->
     <c- a>let</c-> propertiesLength <c- o>=</c-> len<c- p>(</c->propertiesLength<c- p>)</c->
 
     assert_true<c- p>(</c->propertiesLength <c- o>>=</c-> $MIN_CARD<c- p>)</c->
+    
     assert_true<c- p>(</c->propertiesLength <c- o>&lt;=</c-> $MAX_CARD<c- p>)</c->
+    
+    <c- a>let</c-> dt <c- o>=</c-> property_datatype<c- p>(</c->value<c- p>)</c->
+    assert_equal<c- p>(</c->dt<c- p>,</c-> $DATA_TYPE<c- p>)</c->
 <c- p>}</c->
 </pre>
-   <h3 class="heading settled" data-level="5.3" id="property-value-datatype-constraint"><span class="secno">5.3. </span><span class="content">Property Value DataType Constraint</span><a class="self-link" href="#property-value-datatype-constraint"></a></h3>
-   <p>Instances of the `Property Value Type Constraint` class are used to ensure that an the value of a given property class on a given entity class must be of a given type. e.g. date of birth on person must be of type DateTime.</p>
-   <p>The data model for this constraint defines:</p>
-   <ul>
-    <li data-md>
-     <p>the entity class whose instances must meet the constraint</p>
-    <li data-md>
-     <p>the property class being constrained</p>
-    <li data-md>
-     <p>the required data type of value of the constrained property</p>
-   </ul>
-<pre class="language-json highlight"><c- p>{</c->
-    <c- f>"id"</c-> <c- p>:</c-> <c- u>"schema:constraint-1"</c-><c- p>,</c->
-    <c- f>"refs"</c-> <c- p>:</c-> <c- p>{</c->
-        <c- f>"rdf:type"</c-> <c- p>:</c-> <c- u>"egcl:PropertyValueDataTypeConstraint"</c-><c- p>,</c->
-        <c- f>"egcl:entityClass"</c-> <c- p>:</c-> <c- u>"$CLASS"</c-><c- p>,</c->
-        <c- f>"egcl:propertyClass"</c-> <c- p>:</c-> <c- u>"$PROPERTY_CLASS"</c-><c- p>,</c->
-        <c- f>"egcl:datatype"</c-> <c- p>:</c-> <c- u>"$DATA_TYPE"</c->
-    <c- p>}</c->
-<c- p>}</c->
-</pre>
-   <p>The formal semantics for this constraint class are defined in terms of the evaluation functions and bind the variable from the constraint instance as parameters.</p>
-<pre class="language-javascript highlight"><c- c1>// get the instances of the Entity Class indentified in the constraint instance</c->
-<c- a>let</c-> instancesOfClass <c- o>=</c-> hop<c- p>(</c->$CLASS<c- p>,</c-> <c- u>"rdf:type"</c-><c- p>,</c-> <c- kc>true</c-><c- p>)</c->
-
-<c- c1>// for each instance of the specified class get the properties of the specified property class and assert all values are of the correct type.</c->
-<c- k>for</c-> entityInstance <c- k>in</c-> instancesOfClass <c- p>{</c->
-    <c- a>let</c-> propertiesOfSpecifiedType <c- o>=</c-> properties<c- p>(</c->entityInstance<c- p>,</c-> $PROPERTY_CLASS<c- p>)</c->
-    <c- a>let</c-> propertiesLength <c- o>=</c-> len<c- p>(</c->propertiesOfSpecifiedType<c- p>)</c->
-
-    <c- k>for</c-> value <c- k>in</c-> propertiesOfSpecifiedType <c- p>{</c->
-        <c- a>let</c-> dt <c- o>=</c-> property_datatype<c- p>(</c->value<c- p>)</c->
-        assert_equal<c- p>(</c->dt<c- p>,</c-> $DATA_TYPE<c- p>)</c->
-    <c- p>}</c->
-<c- p>}</c->
-</pre>
-   <h3 class="heading settled" data-level="5.4" id="reference-constraint"><span class="secno">5.4. </span><span class="content">Reference Constraint</span><a class="self-link" href="#reference-constraint"></a></h3>
+   <h3 class="heading settled" data-level="5.3" id="reference-constraint"><span class="secno">5.3. </span><span class="content">Reference Constraint</span><a class="self-link" href="#reference-constraint"></a></h3>
    <p>Instances of the `Reference Constraint` class are used to ensure that an instance of an Entity Class contains the correct number of the specified references of a given type. e.g. that a person must have a reference of type `mother` and  constraint the type of the related entity to be `Person`.</p>
    <p>The data model for this constraint defines:</p>
    <ul>
@@ -2352,7 +2322,7 @@ assert_true<c- p>(</c->instanceCount<c- p>,</c-> <c- mf>0</c-><c- p>)</c->
     <c- p>}</c->
 <c- p>}</c->
 </pre>
-   <h3 class="heading settled" data-level="5.5" id="property-value-constraint"><span class="secno">5.5. </span><span class="content">Property Value Constraint</span><a class="self-link" href="#property-value-constraint"></a></h3>
+   <h3 class="heading settled" data-level="5.4" id="property-value-constraint"><span class="secno">5.4. </span><span class="content">Property Value Constraint</span><a class="self-link" href="#property-value-constraint"></a></h3>
    <p>The property value constraint is used to constrain the value of a property. e.g. that a string value must match some regular expression or that a integer value must be in some range.</p>
    <p>The data model for this constraint defines:</p>
    <ul>
@@ -2405,7 +2375,7 @@ assert_true<c- p>(</c->instanceCount<c- p>,</c-> <c- mf>0</c-><c- p>)</c->
     <c- p>}</c->
 <c- p>}</c->
 </pre>
-   <h3 class="heading settled" data-level="5.6" id="query-constraint"><span class="secno">5.6. </span><span class="content">Query Constraint</span><a class="self-link" href="#query-constraint"></a></h3>
+   <h3 class="heading settled" data-level="5.5" id="query-constraint"><span class="secno">5.5. </span><span class="content">Query Constraint</span><a class="self-link" href="#query-constraint"></a></h3>
    <p>The entity query constraint takes a EGQL (Entity Graph Query Language) expression, evaluates it and assume that any entities returned are in violation of the constraint. NOTE: This is waiting on EQL being finalised but the constraint class can still be defined.</p>
    <p>The data model for this constraint defines:</p>
    <ul>
@@ -2428,7 +2398,7 @@ assert_true<c- p>(</c->instanceCount<c- p>,</c-> <c- mf>0</c-><c- p>)</c->
     <c- k>new</c-> ConstraintViolation<c- p>(</c->$CID<c- p>,</c-> e<c- p>)</c->
 <c- p>}</c->
 </pre>
-   <h3 class="heading settled" data-level="5.7" id="application-constraint"><span class="secno">5.7. </span><span class="content">Application Constraint</span><a class="self-link" href="#application-constraint"></a></h3>
+   <h3 class="heading settled" data-level="5.6" id="application-constraint"><span class="secno">5.6. </span><span class="content">Application Constraint</span><a class="self-link" href="#application-constraint"></a></h3>
    <p>An application constraint class is an application specific non-standardised constraint that is executed by the validation engine and returns instances of type constraint viloation. While of course the actual validation cannot be interchanged the idea is that at least it is described and also allows for extension through the creation of common constraints that are given identity.</p>
    <p>The data model for this constraint defines:</p>
    <ul>

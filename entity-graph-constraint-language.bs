@@ -231,13 +231,14 @@ assert_true(instanceCount, 0)
 
 ## Property Constraint
 
-Instances of the `Property Constraint` class are used to ensure that an instance of an Entity Class contains the correct number of the specified properties. e.g. that a person must have a name and a date of birth.
+Instances of the `Property Constraint` class are used to ensure that an instance of an Entity Class contains the correct number of the specified properties, and the allowed data type for values of these properties. e.g. that a person must have a name and a date of birth and values of it must be of data type xsd:DateTime.
 
 The data model for this constraint defines:
 - the entity class whose instances must meet the constraint
 - the property class being constrained
 - the min cardinality of properties of the property class that are allowed on an instance
 - the max cardinality of properties of the property class that are allowed on an instance
+- the required data type of the value of the constrained property
 
 ```json
 {
@@ -245,11 +246,12 @@ The data model for this constraint defines:
     "refs" : {
         "rdf:type" : "egcl:PropertyConstraint",
         "egcl:entityClass" : "$CLASS",
-        "egcl:propertyClass" : "$PROPERTY_CLASS"
+        "egcl:propertyClass" : "$PROPERTY_CLASS",
+        "egcl:datatype" : "$DATA_TYPE"       
     },
     "props" : {
         "egcl:minCard" : "$MIN_CARD",
-        "egcl:maxCard" : "$MAX_CARD"       
+        "egcl:maxCard" : "$MAX_CARD"
     }
 }
 ```
@@ -267,47 +269,11 @@ for entityInstance in instancesOfClass {
     let propertiesLength = len(propertiesLength)
 
     assert_true(propertiesLength >= $MIN_CARD)
+    
     assert_true(propertiesLength <= $MAX_CARD)
-}
-```
-
-## Property Value DataType Constraint
-
-Instances of the `Property Value Type Constraint` class are used to ensure that an the value of a given property class on a given entity class must be of a given type. e.g. date of birth on person must be of type DateTime.
-
-The data model for this constraint defines:
-- the entity class whose instances must meet the constraint
-- the property class being constrained
-- the required data type of value of the constrained property
-
-```json
-{
-    "id" : "schema:constraint-1",
-    "refs" : {
-        "rdf:type" : "egcl:PropertyValueDataTypeConstraint",
-        "egcl:entityClass" : "$CLASS",
-        "egcl:propertyClass" : "$PROPERTY_CLASS",
-        "egcl:datatype" : "$DATA_TYPE"
-    }
-}
-```
-
-The formal semantics for this constraint class are defined in terms of the evaluation functions and bind the variable from the constraint instance as parameters.  
-
-``` javascript
-
-// get the instances of the Entity Class indentified in the constraint instance
-let instancesOfClass = hop($CLASS, "rdf:type", true)
-
-// for each instance of the specified class get the properties of the specified property class and assert all values are of the correct type.
-for entityInstance in instancesOfClass {
-    let propertiesOfSpecifiedType = properties(entityInstance, $PROPERTY_CLASS)
-    let propertiesLength = len(propertiesOfSpecifiedType)
-
-    for value in propertiesOfSpecifiedType {
-        let dt = property_datatype(value)
-        assert_equal(dt, $DATA_TYPE)
-    }
+    
+    let dt = property_datatype(value)
+    assert_equal(dt, $DATA_TYPE)
 }
 ```
 
