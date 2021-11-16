@@ -279,7 +279,7 @@ for entityInstance in instancesOfClass {
 
 ## Reference Constraint
 
-Instances of the `Reference Constraint` class are used to ensure that an instance of an Entity Class contains the correct number of the specified references of a given type. e.g. that a person must have a reference of type `mother` and  constraint the type of the related entity to be `Person`.
+Instances of the `Reference Constraint` class are used to ensure that an instance of an Entity Class contains the correct number of the specified references of a given type. e.g. that a person must have a reference of type `mother` and  constraint the type of the related entity to be `Person`. This constraint can also be used to define the identity of the inverse property type.
 
 The data model for this constraint defines:
 - the entity class whose instances must meet the constraint
@@ -287,6 +287,9 @@ The data model for this constraint defines:
 - the required class of the referenced
 - the min cardinality of properties of the property class that are allowed on an instance
 - the max cardinality of properties of the property class that are allowed on an instance
+- the optional inverse reference class
+- the optional inverse min cardinality
+- the optional inverse max cardinality
 
 ```json
 {
@@ -295,11 +298,14 @@ The data model for this constraint defines:
         "rdf:type" : "egcl:ReferenceConstraint",
         "egcl:entityClass" : "$CLASS",
         "egcl:referenceClass" : "$REFERENCE_CLASS",
-        "egcl:referencedEntityClass" : "$REFERENCED_ENTITY_CLASS"
+        "egcl:referencedEntityClass" : "$REFERENCED_ENTITY_CLASS",
+        "egcl:inverseReferenceClass" : "$INVERSE_REFERENCE_CLASS"
     },
     "props" : {
         "egcl:minCard" : "$MIN_CARD",
-        "egcl:maxCard" : "$MAX_CARD"       
+        "egcl:maxCard" : "$MAX_CARD",
+        "egcl:inverseMinCard" : "$INVERSE_MIN_CARD",
+        "egcl:inverseMaxCard" : "$INVERSE_MAX_CARD"
     }
 }
 ```
@@ -336,7 +342,20 @@ for entityInstance in instancesOfClass {
         assert(isofclass)
     }
 }
+
+// for each instance of the specified class get the reference constraints and check that the inverse reference cardinality is in the range of the min and max cardinality
+for entityInstance in instancesOfClass {
+    let inverseReferences = inverse_references(entityInstance, $PROPERTY_CLASS)
+    let inverseReferencesLength = len(inverseReferences)
+
+    assert_true(inverseReferencesLength >= $INVERSE_MIN_CARD)
+    assert_true(inverseReferencesLength <= $INVERSE_MAX_CARD)
+}
+
+
 ```
+
+
 
 ## Property Value Constraint
 
