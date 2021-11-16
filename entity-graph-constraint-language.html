@@ -1487,7 +1487,7 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version d7036035b, updated Fri Oct 8 17:07:11 2021 -0700" name="generator">
+  <meta content="Bikeshed version dfbc2b297, updated Thu Nov 11 15:52:32 2021 -0800" name="generator">
   <link href="https://open.mimiro.io/specifications/entity-graph-data-model" rel="canonical">
 <style>/* style-autolinks */
 
@@ -2008,7 +2008,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Entity Graph Constraint Language</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Living Standard, <time class="dt-updated" datetime="2021-10-16">16 October 2021</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Living Standard, <time class="dt-updated" datetime="2021-11-16">16 November 2021</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -2264,7 +2264,7 @@ assert_true<c- p>(</c->instanceCount<c- p>,</c-> <c- mf>0</c-><c- p>)</c->
 <c- p>}</c->
 </pre>
    <h3 class="heading settled" data-level="5.3" id="reference-constraint"><span class="secno">5.3. </span><span class="content">Reference Constraint</span><a class="self-link" href="#reference-constraint"></a></h3>
-   <p>Instances of the `Reference Constraint` class are used to ensure that an instance of an Entity Class contains the correct number of the specified references of a given type. e.g. that a person must have a reference of type `mother` and  constraint the type of the related entity to be `Person`.</p>
+   <p>Instances of the `Reference Constraint` class are used to ensure that an instance of an Entity Class contains the correct number of the specified references of a given type. e.g. that a person must have a reference of type `mother` and  constraint the type of the related entity to be `Person`. This constraint can also be used to define the identity of the inverse property type.</p>
    <p>The data model for this constraint defines:</p>
    <ul>
     <li data-md>
@@ -2277,6 +2277,12 @@ assert_true<c- p>(</c->instanceCount<c- p>,</c-> <c- mf>0</c-><c- p>)</c->
      <p>the min cardinality of properties of the property class that are allowed on an instance</p>
     <li data-md>
      <p>the max cardinality of properties of the property class that are allowed on an instance</p>
+    <li data-md>
+     <p>the optional inverse reference class</p>
+    <li data-md>
+     <p>the optional inverse min cardinality</p>
+    <li data-md>
+     <p>the optional inverse max cardinality</p>
    </ul>
 <pre class="language-json highlight"><c- p>{</c->
     <c- f>"id"</c-> <c- p>:</c-> <c- u>"schema:constraint-1"</c-><c- p>,</c->
@@ -2284,11 +2290,14 @@ assert_true<c- p>(</c->instanceCount<c- p>,</c-> <c- mf>0</c-><c- p>)</c->
         <c- f>"rdf:type"</c-> <c- p>:</c-> <c- u>"egcl:ReferenceConstraint"</c-><c- p>,</c->
         <c- f>"egcl:entityClass"</c-> <c- p>:</c-> <c- u>"$CLASS"</c-><c- p>,</c->
         <c- f>"egcl:referenceClass"</c-> <c- p>:</c-> <c- u>"$REFERENCE_CLASS"</c-><c- p>,</c->
-        <c- f>"egcl:referencedEntityClass"</c-> <c- p>:</c-> <c- u>"$REFERENCED_ENTITY_CLASS"</c->
+        <c- f>"egcl:referencedEntityClass"</c-> <c- p>:</c-> <c- u>"$REFERENCED_ENTITY_CLASS"</c-><c- p>,</c->
+        <c- f>"egcl:inverseReferenceClass"</c-> <c- p>:</c-> <c- u>"$INVERSE_REFERENCE_CLASS"</c->
     <c- p>},</c->
     <c- f>"props"</c-> <c- p>:</c-> <c- p>{</c->
         <c- f>"egcl:minCard"</c-> <c- p>:</c-> <c- u>"$MIN_CARD"</c-><c- p>,</c->
-        <c- f>"egcl:maxCard"</c-> <c- p>:</c-> <c- u>"$MAX_CARD"</c->       
+        <c- f>"egcl:maxCard"</c-> <c- p>:</c-> <c- u>"$MAX_CARD"</c-><c- p>,</c->
+        <c- f>"egcl:inverseMinCard"</c-> <c- p>:</c-> <c- u>"$INVERSE_MIN_CARD"</c-><c- p>,</c->
+        <c- f>"egcl:inverseMaxCard"</c-> <c- p>:</c-> <c- u>"$INVERSE_MAX_CARD"</c->
     <c- p>}</c->
 <c- p>}</c->
 </pre>
@@ -2320,6 +2329,15 @@ assert_true<c- p>(</c->instanceCount<c- p>,</c-> <c- mf>0</c-><c- p>)</c->
 
         assert<c- p>(</c->isofclass<c- p>)</c->
     <c- p>}</c->
+<c- p>}</c->
+
+<c- c1>// for each instance of the specified class get the reference constraints and check that the inverse reference cardinality is in the range of the min and max cardinality</c->
+<c- k>for</c-> entityInstance <c- k>in</c-> instancesOfClass <c- p>{</c->
+    <c- a>let</c-> inverseReferences <c- o>=</c-> inverse_references<c- p>(</c->entityInstance<c- p>,</c-> $PROPERTY_CLASS<c- p>)</c->
+    <c- a>let</c-> inverseReferencesLength <c- o>=</c-> len<c- p>(</c->inverseReferences<c- p>)</c->
+
+    assert_true<c- p>(</c->inverseReferencesLength <c- o>>=</c-> $INVERSE_MIN_CARD<c- p>)</c->
+    assert_true<c- p>(</c->inverseReferencesLength <c- o>&lt;=</c-> $INVERSE_MAX_CARD<c- p>)</c->
 <c- p>}</c->
 </pre>
    <h3 class="heading settled" data-level="5.4" id="property-value-constraint"><span class="secno">5.4. </span><span class="content">Property Value Constraint</span><a class="self-link" href="#property-value-constraint"></a></h3>
