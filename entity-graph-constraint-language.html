@@ -1487,7 +1487,7 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version dfbc2b297, updated Thu Nov 11 15:52:32 2021 -0800" name="generator">
+  <meta content="Bikeshed version bbc364800, updated Mon Nov 15 13:57:55 2021 -0800" name="generator">
   <link href="https://open.mimiro.io/specifications/entity-graph-data-model" rel="canonical">
 <style>/* style-autolinks */
 
@@ -2008,7 +2008,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Entity Graph Constraint Language</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Living Standard, <time class="dt-updated" datetime="2021-11-16">16 November 2021</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Living Standard, <time class="dt-updated" datetime="2021-11-21">21 November 2021</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -2305,9 +2305,9 @@ assert_true<c- p>(</c->instanceCount<c- p>,</c-> <c- mf>0</c-><c- p>)</c->
 <pre class="language-javascript highlight"><c- c1>// get the instances of the Entity Class indentified in the constraint instance</c->
 <c- a>let</c-> instancesOfClass <c- o>=</c-> hop<c- p>(</c->$CLASS<c- p>,</c-> <c- u>"rdf:type"</c-><c- p>,</c-> <c- kc>true</c-><c- p>)</c->
 
-<c- c1>// for each instance of the specified class get the properties of the specified property class and assert the cardinailty meets the specified values. </c->
+<c- c1>// for each instance of the specified class get the properties of the specified reference class and assert the cardinailty meets the specified values </c->
 <c- k>for</c-> entityInstance <c- k>in</c-> instancesOfClass <c- p>{</c->
-    <c- a>let</c-> references <c- o>=</c-> references<c- p>(</c->entityInstance<c- p>,</c-> $PROPERTY_CLASS<c- p>)</c->
+    <c- a>let</c-> references <c- o>=</c-> hop<c- p>(</c->entityInstance<c- p>,</c-> $REFERENCE_CLASS<c- p>)</c->
     <c- a>let</c-> referencesLength <c- o>=</c-> len<c- p>(</c->references<c- p>)</c->
 
     assert_true<c- p>(</c->propertiesLength <c- o>>=</c-> $MIN_CARD<c- p>)</c->
@@ -2331,9 +2331,11 @@ assert_true<c- p>(</c->instanceCount<c- p>,</c-> <c- mf>0</c-><c- p>)</c->
     <c- p>}</c->
 <c- p>}</c->
 
-<c- c1>// for each instance of the specified class get the reference constraints and check that the inverse reference cardinality is in the range of the min and max cardinality</c->
-<c- k>for</c-> entityInstance <c- k>in</c-> instancesOfClass <c- p>{</c->
-    <c- a>let</c-> inverseReferences <c- o>=</c-> inverse_references<c- p>(</c->entityInstance<c- p>,</c-> $PROPERTY_CLASS<c- p>)</c->
+<c- c1>// for each instance of the specified referenced class get the referencees and check that the inverse reference cardinality is in the range of the min and max cardinality</c->
+<c- a>let</c-> instancesOfReferenceClass <c- o>=</c-> hop<c- p>(</c->$REFERENCED_ENTITY_CLASS<c- p>,</c-> <c- u>"rdf:type"</c-><c- p>,</c-> <c- kc>true</c-><c- p>)</c->
+
+<c- k>for</c-> entityInstance <c- k>in</c-> instancesOfReferenceClass <c- p>{</c->
+    <c- a>let</c-> inverseReferences <c- o>=</c-> hop<c- p>(</c->entityInstance<c- p>,</c-> $REFERENCE_CLASS<c- p>,</c-> <c- kc>true</c-><c- p>)</c->
     <c- a>let</c-> inverseReferencesLength <c- o>=</c-> len<c- p>(</c->inverseReferences<c- p>)</c->
 
     assert_true<c- p>(</c->inverseReferencesLength <c- o>>=</c-> $INVERSE_MIN_CARD<c- p>)</c->
@@ -2341,7 +2343,7 @@ assert_true<c- p>(</c->instanceCount<c- p>,</c-> <c- mf>0</c-><c- p>)</c->
 <c- p>}</c->
 </pre>
    <h3 class="heading settled" data-level="5.4" id="property-value-constraint"><span class="secno">5.4. </span><span class="content">Property Value Constraint</span><a class="self-link" href="#property-value-constraint"></a></h3>
-   <p>The property value constraint is used to constrain the value of a property. e.g. that a string value must match some regular expression or that a integer value must be in some range.</p>
+   <p>The property value constraint is used to constrain the value of a property. e.g. that a string value must match some regular expression or that an integer value must be in some range.</p>
    <p>The data model for this constraint defines:</p>
    <ul>
     <li data-md>
