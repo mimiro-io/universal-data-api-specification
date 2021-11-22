@@ -317,9 +317,9 @@ The formal semantics for this constraint class are defined in terms of the evalu
 // get the instances of the Entity Class indentified in the constraint instance
 let instancesOfClass = hop($CLASS, "rdf:type", true)
 
-// for each instance of the specified class get the properties of the specified property class and assert the cardinailty meets the specified values. 
+// for each instance of the specified class get the properties of the specified reference class and assert the cardinailty meets the specified values 
 for entityInstance in instancesOfClass {
-    let references = references(entityInstance, $PROPERTY_CLASS)
+    let references = hop(entityInstance, $REFERENCE_CLASS)
     let referencesLength = len(references)
 
     assert_true(propertiesLength >= $MIN_CARD)
@@ -343,23 +343,21 @@ for entityInstance in instancesOfClass {
     }
 }
 
-// for each instance of the specified class get the reference constraints and check that the inverse reference cardinality is in the range of the min and max cardinality
-for entityInstance in instancesOfClass {
-    let inverseReferences = inverse_references(entityInstance, $PROPERTY_CLASS)
+// for each instance of the specified referenced class get the referencees and check that the inverse reference cardinality is in the range of the min and max cardinality
+let instancesOfReferenceClass = hop($REFERENCED_ENTITY_CLASS, "rdf:type", true)
+
+for entityInstance in instancesOfReferenceClass {
+    let inverseReferences = hop(entityInstance, $REFERENCE_CLASS, true)
     let inverseReferencesLength = len(inverseReferences)
 
     assert_true(inverseReferencesLength >= $INVERSE_MIN_CARD)
     assert_true(inverseReferencesLength <= $INVERSE_MAX_CARD)
 }
-
-
 ```
-
-
 
 ## Property Value Constraint
 
-The property value constraint is used to constrain the value of a property. e.g. that a string value must match some regular expression or that a integer value must be in some range. 
+The property value constraint is used to constrain the value of a property. e.g. that a string value must match some regular expression or that an integer value must be in some range. 
 
 The data model for this constraint defines:
 - the (optional) entity class whose instances must meet the constraint
