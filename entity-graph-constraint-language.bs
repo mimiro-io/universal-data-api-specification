@@ -284,10 +284,10 @@ Instances of the `Reference Constraint` class are used to ensure that an instanc
 The data model for this constraint defines:
 - the entity class whose instances must meet the constraint
 - the reference class being constrained
-- the required class of the referenced
+- the class of the referenced entity
+- the inverse reference class
 - the min cardinality of properties of the property class that are allowed on an instance
 - the max cardinality of properties of the property class that are allowed on an instance
-- the optional inverse reference class
 - the optional inverse min cardinality
 - the optional inverse max cardinality
 
