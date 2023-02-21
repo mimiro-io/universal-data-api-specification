@@ -14,7 +14,7 @@ Boilerplate: copyright no
 
 Documents can either be a draft or a release. Numbering uses semantic versioning. Everything except major releases is backwards compatible.
 
-This document is: 0.1.0 draft.
+This document is: 0.7.0 draft.
 
 # Introduction
 
@@ -49,12 +49,12 @@ deleted              := xsd:boolean
 
 references           := [ key-ref-pair* ]
 
-key-val-pair         := xsd:uri , value | [ value ]
+key-val-pair         := xsd:uri , value
 
 key-ref-pair         := xsd:uri , xsd:uri | [ xsd:uri ]
 
 value                := child-entity | xsd:string |
-                        xsd:int | xsd:datetime | xsd:uri | xsd:double | xsd:float
+                        xsd:int | xsd:datetime | xsd:uri | xsd:double | xsd:float | [ value ]
 
 child-entity         := { id, properties, references } | { properties, references }
 ```
