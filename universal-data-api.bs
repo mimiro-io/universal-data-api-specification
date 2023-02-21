@@ -54,7 +54,7 @@ key-val-pair         := xsd:uri , value
 key-ref-pair         := xsd:uri , xsd:uri | [ xsd:uri ]
 
 value                := child-entity | xsd:string |
-                        xsd:int | xsd:datetime | xsd:uri | xsd:double | xsd:float | [ value ]
+                        xsd:int | xsd:datetime | xsd:uri | xsd:double | xsd:float | [ value* ]
 
 child-entity         := { id, properties, references } | { properties, references }
 ```
