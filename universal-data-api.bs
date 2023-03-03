@@ -34,7 +34,7 @@ The Entity graph Data Model is the meta-model that is used to describe all data.
 
 ## The Entity Graph Data Model
 
-The data model consists of entities. An entity is a single data object that represents some subject, some thing. An entity has identity, properties and references. Property values are primarily literals, or a list of values. References are typed references to other entities. The identity of every entity is described using a URI. All property and reference types are also described using URIs. An entity, or list of entities, can also be the value of a property. 
+The data model consists of entities. An entity is a single data object that represents some subject, some thing. An entity has identity, properties and references. Property values are primarily literals, or a list of values. References are typed references to other entities. The identity of every entity is described using a URI. All property and reference types are also described using URIs. An entity, or list of entities, can also be the value of a property.
 
 The model is defined formally as:
 
@@ -42,6 +42,8 @@ The model is defined formally as:
 entity               := { id, deleted, recorded, properties, references }
 
 id                   := xsd:uri
+
+recorded             := xsd:uint64
 
 properties           := [ key-val-pair* ]
 
@@ -181,6 +183,7 @@ The expanded version of the above entity with given namespaces context is:
         }
     }
 ```
+
 
 # API
 
@@ -514,4 +517,90 @@ By default all entities are untyped. To convey the type of an entity there is a 
     }
 ]
 ```
+
+# JSON-LD Binding
+
+The JSON-LD binding assumes a generalised mapping between an entity and the bounded context of an RDF resource. A single Entity corresponds to a RDF resource, the entity properties are RDF statements where the value is a literal or a blank node, and RDF statements where the object is a resource map to entity references. There are no specific mappings for lists. 
+
+To align the JSON-LD binding with the core streaming semantic of the protocol we introduce JSON-LD Streaming representation. 
+
+The JSON-LD Streaming representation is a JSON array of JSON objects. The first object in the array is a JSON-LD context object. Then follows N JSON-LD entity representations. Optionally, the final JSON-LD object represents a continuation token.
+
+Given the following Entity Model as JSON object:
+
+```json
+[
+    {
+        "id" : "@context",
+        "namespaces" : {
+            "_" : "http://data.mimiro.io/people/" ,
+            "schema" : "http://data.mimiro.io/schema/",
+            "places" : "http://data.mimiro.io/places/",
+            "rdf" : "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+        } 
+    },
+    {
+        "id" : "bob",
+        "recorded" : 1672299810499868928,
+        "deleted" : false,
+        "props" : {
+            "schema:name" : "bob",
+        },
+        "refs" : {
+            "schema:lives-in" : "places:oslo",
+            "schema:friends" : [ "colin", "james" ],
+            "rdf:type" : "schema:Person"
+        }
+    },
+    {
+        "id" : "@continuation",
+        "token" : "sfbbfsbfjskjfsjk="
+    }
+]
+```
+
+The JSON-LD stream is as follows:
+
+```json
+[
+    {
+            "@context": {
+                "core": "http://data.mimiro.io/core/",
+                "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+                "people": "http://data.mimiro.io/people/",
+                "places": "http://data.mimiro.io/places/",
+                "schema": "http://data.mimiro.io/schema/"                    
+            }
+    },
+
+    {
+            "@id": "ns3:homer",
+            "core:recorded": 1672299810499868928,
+            "core:deleted": false,
+            "rdf:type": { "@id" : "schema:Person" },
+            "schema:lives-in": [ { "@id": "places:oslo"} ],
+            "schema:friends": [ { "@id": "people:colin"} , { "@id": "people:james"} ],
+            "schema:name": "bob"
+    },
+
+    {
+        "ns2:type": "core:continuation",
+        "core:token": "AAgAAAACAAAAAAAAAAo="
+    }
+]
+```
+
+Note that the context is a normal JSON-LD context object. The entities are each represented as a single JSON-LD object. The built in properties are mapped to the `core` namespace.
+
+The continuation token is represented as a JSON-LD object with the type `core:continuation` and the token value as the `core:token` property.
+
+## JSON-LD Content Type
+
+The JSON-LD content type is `application/ld+json`. It should be used when the client is able to accept JSON-LD responses. It should be sent as an `Accept` header in the request.
+
+The endpoints that support JSON-LD are:
+
+* `/datasets/{dataset}/changes`
+* `/datasets/{dataset}/entities`
+
 
