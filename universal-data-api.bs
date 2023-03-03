@@ -584,7 +584,7 @@ The JSON-LD stream is as follows:
     },
 
     {
-        "ns2:type": "core:continuation",
+        "rdf:type": "core:continuation",
         "core:token": "AAgAAAACAAAAAAAAAAo="
     }
 ]
