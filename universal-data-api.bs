@@ -520,13 +520,13 @@ By default all entities are untyped. To convey the type of an entity there is a 
 
 # JSON-LD Binding
 
-The JSON-LD binding assumes a generalised mapping between an entity and the bounded context of an RDF resource. A single Entity corresponds to a RDF resource, the entity properties are RDF statements where the value is a literal or a blank node, and RDF statements where the object is a resource map to entity references. There are no specific mappings for lists. 
+The JSON-LD binding assumes a generalised mapping between an entity and the bounded context of an RDF resource. A single Entity corresponds to a RDF resource, the entity properties are RDF statements where the object is a literal or a blank node, and RDF statements where the object is a resource map to entity references. There are no specific mappings for ordered lists. 
 
 To align the JSON-LD binding with the core streaming semantic of the protocol we introduce JSON-LD Streaming representation. 
 
-The JSON-LD Streaming representation is a JSON array of JSON objects. The first object in the array is a JSON-LD context object. Then follows N JSON-LD entity representations. Optionally, the final JSON-LD object represents a continuation token.
+The JSON-LD Streaming representation is am array of JSON objects. The first object in the array is a JSON-LD context object. Then follows N objects are JSON-LD entity representations. Optionally, the final json object is JSON-LD representation of a continuation token.
 
-Given the following Entity Model as JSON object:
+Given the following Entity Model stream as JSON object:
 
 ```json
 [
@@ -565,7 +565,7 @@ The JSON-LD stream is as follows:
 [
     {
             "@context": {
-                "core": "http://data.mimiro.io/core/",
+                "core": "http://data.mimiro.io/core/uda/",
                 "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
                 "people": "http://data.mimiro.io/people/",
                 "places": "http://data.mimiro.io/places/",
@@ -584,15 +584,25 @@ The JSON-LD stream is as follows:
     },
 
     {
-        "rdf:type": "core:continuation",
+        "rdf:type": { "@id" : "core:continuation" },
         "core:token": "AAgAAAACAAAAAAAAAAo="
     }
 ]
 ```
 
-Note that the context is a normal JSON-LD context object. The entities are each represented as a single JSON-LD object. The built in properties are mapped to the `core` namespace.
+Note that the context is a normal JSON-LD context object. The entities are each represented as a single JSON-LD object. The entity id becomes the `@id` property. 
 
-The continuation token is represented as a JSON-LD object with the type `core:continuation` and the token value as the `core:token` property.
+The built in properties, recorded, deleted, are mapped into the core namespace; `http://data.mimiro.io/core/uda/` as `core:recorded` and `core:deleted`.
+
+The entity references are encoded in the form of 
+
+```json
+{
+    "@id" : "reference URI"
+}
+```
+
+The continuation token is represented as a JSON-LD object with the rdf type `core:continuation` and the token value as the `core:token` property.
 
 ## JSON-LD Content Type
 
