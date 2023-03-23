@@ -1269,7 +1269,7 @@ Possible extra rowspan handling
 	ul.index ul,
 	ul.index dl { font-size: smaller; }
 	@media not print {
-		ul.index li span:not(.dfn-paneled) {
+		ul.index li a + span {
 			white-space: nowrap;
 			color: transparent; }
 		ul.index li a:hover + span,
@@ -1487,10 +1487,9 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version bbc364800, updated Mon Nov 15 13:57:55 2021 -0800" name="generator">
+  <meta content="Bikeshed version 077497365, updated Thu Mar 2 15:15:29 2023 -0800" name="generator">
   <link href="https://open.mimiro.io/specifications/universal-data-api-specification" rel="canonical">
 <style>/* style-autolinks */
-
 .css.css, .property.property, .descriptor.descriptor {
     color: var(--a-normal-text);
     font-size: inherit;
@@ -1550,7 +1549,8 @@ pre .property::before, pre .property::after {
 
 [data-link-type=biblio] {
     white-space: pre;
-}</style>
+}
+</style>
 <style>/* style-colors */
 
 /* Any --*-text not paired with a --*-bg is assumed to have a transparent bg */
@@ -1659,9 +1659,9 @@ pre .property::before, pre .property::after {
     --outdated-shadow: red;
 
     --editedrec-bg: darkorange;
-}</style>
+}
+</style>
 <style>/* style-counters */
-
 body {
     counter-reset: example figure issue;
 }
@@ -1688,9 +1688,9 @@ figcaption {
 }
 figcaption:not(.no-marker)::before {
     content: "Figure " counter(figure) " ";
-}</style>
+}
+</style>
 <style>/* style-issues */
-
 a[href].issue-return {
     float: right;
     float: inline-end;
@@ -1700,7 +1700,6 @@ a[href].issue-return {
 }
 </style>
 <style>/* style-md-lists */
-
 /* This is a weird hack for me not yet following the commonmark spec
    regarding paragraph and lists. */
 [data-md] > :first-child {
@@ -1708,7 +1707,8 @@ a[href].issue-return {
 }
 [data-md] > :last-child {
     margin-bottom: 0;
-}</style>
+}
+</style>
 <style>/* style-selflinks */
 
 :root {
@@ -1735,6 +1735,14 @@ a.self-link:hover {
 }
 .heading > a.self-link {
     font-size: 83%;
+}
+.example > a.self-link,
+.note > a.self-link,
+.issue > a.self-link {
+    /* These blocks are overflow:auto, so positioning outside
+       doesn't work. */
+    left: auto;
+    right: 0;
 }
 li > a.self-link {
     left: calc(-1 * (3.5rem - 26px) - 2em);
@@ -1933,6 +1941,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
        which is quite common in practice... */
     img { background: white; }
 }
+
 @media (prefers-color-scheme: dark) {
     :root {
         --selflink-text: black;
@@ -2008,7 +2017,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Universal Data API</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Living Standard, <time class="dt-updated" datetime="2021-11-21">21 November 2021</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Version 0.7.0, <time class="dt-updated" datetime="2023-03-09">23 March 2023</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -2058,6 +2067,11 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
      <ol class="toc">
       <li><a href="#conveying-type"><span class="secno">8.1</span> <span class="content">Conveying Type</span></a>
      </ol>
+    <li>
+     <a href="#json-ld-binding"><span class="secno">9</span> <span class="content">JSON-LD Binding</span></a>
+     <ol class="toc">
+      <li><a href="#json-ld-content-type"><span class="secno">9.1</span> <span class="content">JSON-LD Content Type</span></a>
+     </ol>
     <li><a href="#conformance"><span class="secno"></span> <span class="content"> Conformance</span></a>
     <li>
      <a href="#references"><span class="secno"></span> <span class="content">References</span></a>
@@ -2069,7 +2083,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <main>
    <h2 class="heading settled" data-level="1" id="document-status"><span class="secno">1. </span><span class="content">Document Status</span><a class="self-link" href="#document-status"></a></h2>
    <p>Documents can either be a draft or a release. Numbering uses semantic versioning. Everything except major releases is backwards compatible.</p>
-   <p>This document is: 0.1.0 draft.</p>
+   <p>This document is: 0.7.0 draft.</p>
    <h2 class="heading settled" data-level="2" id="introduction"><span class="secno">2. </span><span class="content">Introduction</span><a class="self-link" href="#introduction"></a></h2>
    <p>This specification defines a semantic graph data model, its serialisation and a simple and consistent API to expose, synchronise, update and query datasets. The specification defines how a server manages and exposes a collection of datasets. A dataset consists of entities. An entity has properties and references, and can be serialised as a JSON object. Clients can request all data in a dataset or just the entities that have changed since a given point in time. As well as consuming datasests, clients can also post updates to writeable datasets.</p>
    <h2 class="heading settled" data-level="3" id="motivation"><span class="secno">3. </span><span class="content">Motivation</span><a class="self-link" href="#motivation"></a></h2>
@@ -2085,18 +2099,20 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
 
 <c- k>id                   </c->:= <c- k>xsd</c->:<c- k>uri</c->
 
+<c- k>recorded             </c->:= <c- k>xsd</c->:<c- k>uint64</c->
+
 <c- k>properties           </c->:= <c- p>[</c-> <c- k>key-val-pair</c->* <c- p>]</c->
 
 <c- k>deleted              </c->:= <c- k>xsd</c->:<c- k>boolean</c->
 
 <c- k>references           </c->:= <c- p>[</c-> <c- k>key-ref-pair</c->* <c- p>]</c->
 
-<c- k>key-val-pair         </c->:= <c- k>xsd</c->:<c- k>uri </c-><c- p>,</c-> <c- k>value </c-><c- p>|</c-> <c- p>[</c-> <c- k>value </c-><c- p>]</c->
+<c- k>key-val-pair         </c->:= <c- k>xsd</c->:<c- k>uri </c-><c- p>,</c-> <c- k>value</c->
 
 <c- k>key-ref-pair         </c->:= <c- k>xsd</c->:<c- k>uri </c-><c- p>,</c-> <c- k>xsd</c->:<c- k>uri </c-><c- p>|</c-> <c- p>[</c-> <c- k>xsd</c->:<c- k>uri </c-><c- p>]</c->
 
 <c- k>value                </c->:= <c- k>child-entity </c-><c- p>|</c-> <c- k>xsd</c->:<c- k>string </c-><c- p>|</c->
-                        <c- k>xsd</c->:<c- k>int </c-><c- p>|</c-> <c- k>xsd</c->:<c- k>datetime </c-><c- p>|</c-> <c- k>xsd</c->:<c- k>uri </c-><c- p>|</c-> <c- k>xsd</c->:<c- k>double </c-><c- p>|</c-> <c- k>xsd</c->:<c- k>float</c->
+                        <c- k>xsd</c->:<c- k>int </c-><c- p>|</c-> <c- k>xsd</c->:<c- k>datetime </c-><c- p>|</c-> <c- k>xsd</c->:<c- k>uri </c-><c- p>|</c-> <c- k>xsd</c->:<c- k>double </c-><c- p>|</c-> <c- k>xsd</c->:<c- k>float </c-><c- p>|</c-> <c- p>[</c-> <c- k>value</c->* <c- p>]</c->
 
 <c- k>child-entity         </c->:= <c- p>{</c-> <c- k>id</c-><c- p>,</c-> <c- k>properties</c-><c- p>,</c-> <c- k>references </c-><c- p>}</c-> <c- p>|</c-> <c- p>{</c-> <c- k>properties</c-><c- p>,</c-> <c- k>references </c-><c- p>}</c->
 </pre>
@@ -2151,7 +2167,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
    <p>A context can be provided as as the first object in an array of entities. The context defines the mappings between short prefixes and full URIs. This follows the ideas in (https://www.w3.org/TR/curie/).</p>
    <p>A context is defined as a JSON object. The object has one key called `id`, whose value MUST be `@context`.</p>
    <p>Another key `namespaces` MUST have a JSON object as the value. Each key pair in the namespaces object is an expansion definition.</p>
-   <p>The key <a class="property" data-link-type="propdesc">_</a> is the default expansion and used when no prefix is provided for an id value, a property key, or a reference key.</p>
+   <p>The key <a class="property css" data-link-type="property">_</a> is the default expansion and used when no prefix is provided for an id value, a property key, or a reference key.</p>
    <p>The followig context defines the default expansion and one expansion for the prefix `people`.</p>
 <pre class="language-json highlight"><c- p>{</c->
     <c- f>"id"</c-> <c- p>:</c-> <c- u>"@context"</c-><c- p>,</c->
@@ -2180,12 +2196,12 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
 <c- p>]</c->
 </pre>
    <p>The expanded version of the above entity with given namespaces context is:</p>
-<pre>    {
-        "id" : "http://data.mimiro.io/people/bob",
-        "props" : {
-            "http://data.mimiro.io/properties/name" : "bob"
-        }
+<pre>{
+    "id" : "http://data.mimiro.io/people/bob",
+    "props" : {
+        "http://data.mimiro.io/properties/name" : "bob"
     }
+}
 </pre>
    <h2 class="heading settled" data-level="6" id="api"><span class="secno">6. </span><span class="content">API</span><a class="self-link" href="#api"></a></h2>
    <p>The API is defined in terms of a RESTful API. A server implementing the api MUST expose the following endpoints and implement the described semantics. The API uses a fixed URI structure (there are dynamic values within) to expose resources.</p>
@@ -2257,7 +2273,7 @@ re<c- kc>turns</c->
     <dd data-md>
      <p>optional query parameter is a base64 encoded value that the server understands.</p>
    </dl>
-   <p>The response MAY contain the <a class="property" data-link-type="propdesc">universal-data-api-fullsync</a> HTTP header. If this is set to true then the client SHOULD delete all local data and make a new request to the server with no since token. The data provided by the subsequent request should be consider the new local data.</p>
+   <p>The response MAY contain the <a class="property css" data-link-type="property">universal-data-api-fullsync</a> HTTP header. If this is set to true then the client SHOULD delete all local data and make a new request to the server with no since token. The data provided by the subsequent request should be consider the new local data.</p>
    <p>The response body is an array of JSON Objects. The first object in the array MUST be a context, the following objects are entities serialised to JSON as described in the data model, the last entity MAY be a continuation object.</p>
    <p>The following example is a normative request / response interaction.</p>
 <pre class="language-json highlight">GET /da<c- kc>tasets</c->/people/cha<c- kc>n</c->ges?si<c- kc>n</c->ce=<c- p>[</c->si<c- kc>n</c->ce_<c- kc>t</c->oke<c- kc>n</c-><c- p>]</c->
@@ -2288,7 +2304,7 @@ re<c- kc>turns</c-> ==>
 </pre>
    <p>The server is responsible for returning continuation tokens. These tokens can be stored and used by clients as values of subsequence since query parameter. A server returns a continuation token as a special json object in the response body.</p>
    <p>A server MAY inject as many continuation tokens as it wants to in a response. Typically a server will return one token at the end of the response.</p>
-   <p>A continuation token is a JSON object that MUST have an <a class="property" data-link-type="propdesc">id</a> key whose value MUST be '@continuation'. In addition, the JSON object MUST contain the key <a class="property" data-link-type="propdesc">token</a> and the value is a base64 encoded string that the server can use as a since query parameter.</p>
+   <p>A continuation token is a JSON object that MUST have an <a class="property css" data-link-type="property">id</a> key whose value MUST be '@continuation'. In addition, the JSON object MUST contain the key <a class="property css" data-link-type="property">token</a> and the value is a base64 encoded string that the server can use as a since query parameter.</p>
    <p>The following example is a normative request / response interaction.</p>
 <pre class="language-json highlight">GET /da<c- kc>tasets</c->/people/cha<c- kc>n</c->ges
 
@@ -2456,6 +2472,85 @@ universal-data-api-full-sync-id : string
     <c- p>}</c->
 <c- p>]</c->
 </pre>
+   <h2 class="heading settled" data-level="9" id="json-ld-binding"><span class="secno">9. </span><span class="content">JSON-LD Binding</span><a class="self-link" href="#json-ld-binding"></a></h2>
+   <p>The JSON-LD binding assumes a generalised mapping between an entity and the bounded context of an RDF resource. A single Entity corresponds to a RDF resource, the entity properties are RDF statements where the object is a literal or a blank node, and RDF statements where the object is a resource map to entity references. There are no specific mappings for ordered lists.</p>
+   <p>To align the JSON-LD binding with the core streaming semantic of the protocol we introduce JSON-LD Streaming representation.</p>
+   <p>The JSON-LD Streaming representation is am array of JSON objects. The first object in the array is a JSON-LD context object. Then follows N objects are JSON-LD entity representations. Optionally, the final json object is JSON-LD representation of a continuation token.</p>
+   <p>Given the following Entity Model stream as JSON object:</p>
+<pre class="language-json highlight"><c- p>[</c->
+    <c- p>{</c->
+        <c- f>"id"</c-> <c- p>:</c-> <c- u>"@context"</c-><c- p>,</c->
+        <c- f>"namespaces"</c-> <c- p>:</c-> <c- p>{</c->
+            <c- f>"_"</c-> <c- p>:</c-> <c- u>"http://data.mimiro.io/people/"</c-> <c- p>,</c->
+            <c- f>"schema"</c-> <c- p>:</c-> <c- u>"http://data.mimiro.io/schema/"</c-><c- p>,</c->
+            <c- f>"places"</c-> <c- p>:</c-> <c- u>"http://data.mimiro.io/places/"</c-><c- p>,</c->
+            <c- f>"rdf"</c-> <c- p>:</c-> <c- u>"http://www.w3.org/1999/02/22-rdf-syntax-ns#"</c->
+        <c- p>}</c-> 
+    <c- p>},</c->
+    <c- p>{</c->
+        <c- f>"id"</c-> <c- p>:</c-> <c- u>"bob"</c-><c- p>,</c->
+        <c- f>"recorded"</c-> <c- p>:</c-> <c- mi>1672299810499868928</c-><c- p>,</c->
+        <c- f>"deleted"</c-> <c- p>:</c-> <c- kc>false</c-><c- p>,</c->
+        <c- f>"props"</c-> <c- p>:</c-> <c- p>{</c->
+            <c- f>"schema:name"</c-> <c- p>:</c-> <c- u>"bob"</c-><c- p>,</c->
+        <c- p>},</c->
+        <c- f>"refs"</c-> <c- p>:</c-> <c- p>{</c->
+            <c- f>"schema:lives-in"</c-> <c- p>:</c-> <c- u>"places:oslo"</c-><c- p>,</c->
+            <c- f>"schema:friends"</c-> <c- p>:</c-> <c- p>[</c-> <c- u>"colin"</c-><c- p>,</c-> <c- u>"james"</c-> <c- p>],</c->
+            <c- f>"rdf:type"</c-> <c- p>:</c-> <c- u>"schema:Person"</c->
+        <c- p>}</c->
+    <c- p>},</c->
+    <c- p>{</c->
+        <c- f>"id"</c-> <c- p>:</c-> <c- u>"@continuation"</c-><c- p>,</c->
+        <c- f>"token"</c-> <c- p>:</c-> <c- u>"sfbbfsbfjskjfsjk="</c->
+    <c- p>}</c->
+<c- p>]</c->
+</pre>
+   <p>The JSON-LD stream is as follows:</p>
+<pre class="language-json highlight"><c- p>[</c->
+    <c- p>{</c->
+            <c- f>"@context"</c-><c- p>:</c-> <c- p>{</c->
+                <c- f>"core"</c-><c- p>:</c-> <c- u>"http://data.mimiro.io/core/uda/"</c-><c- p>,</c->
+                <c- f>"rdf"</c-><c- p>:</c-> <c- u>"http://www.w3.org/1999/02/22-rdf-syntax-ns#"</c-><c- p>,</c->
+                <c- f>"people"</c-><c- p>:</c-> <c- u>"http://data.mimiro.io/people/"</c-><c- p>,</c->
+                <c- f>"places"</c-><c- p>:</c-> <c- u>"http://data.mimiro.io/places/"</c-><c- p>,</c->
+                <c- f>"schema"</c-><c- p>:</c-> <c- u>"http://data.mimiro.io/schema/"</c->                    
+            <c- p>}</c->
+    <c- p>},</c->
+
+    <c- p>{</c->
+            <c- f>"@id"</c-><c- p>:</c-> <c- u>"ns3:homer"</c-><c- p>,</c->
+            <c- f>"core:recorded"</c-><c- p>:</c-> <c- mi>1672299810499868928</c-><c- p>,</c->
+            <c- f>"core:deleted"</c-><c- p>:</c-> <c- kc>false</c-><c- p>,</c->
+            <c- f>"rdf:type"</c-><c- p>:</c-> <c- p>{</c-> <c- f>"@id"</c-> <c- p>:</c-> <c- u>"schema:Person"</c-> <c- p>},</c->
+            <c- f>"schema:lives-in"</c-><c- p>:</c-> <c- p>[</c-> <c- p>{</c-> <c- f>"@id"</c-><c- p>:</c-> <c- u>"places:oslo"</c-><c- p>}</c-> <c- p>],</c->
+            <c- f>"schema:friends"</c-><c- p>:</c-> <c- p>[</c-> <c- p>{</c-> <c- f>"@id"</c-><c- p>:</c-> <c- u>"people:colin"</c-><c- p>}</c-> <c- p>,</c-> <c- p>{</c-> <c- f>"@id"</c-><c- p>:</c-> <c- u>"people:james"</c-><c- p>}</c-> <c- p>],</c->
+            <c- f>"schema:name"</c-><c- p>:</c-> <c- u>"bob"</c->
+    <c- p>},</c->
+
+    <c- p>{</c->
+        <c- f>"rdf:type"</c-><c- p>:</c-> <c- p>{</c-> <c- f>"@id"</c-> <c- p>:</c-> <c- u>"core:continuation"</c-> <c- p>},</c->
+        <c- f>"core:token"</c-><c- p>:</c-> <c- u>"AAgAAAACAAAAAAAAAAo="</c->
+    <c- p>}</c->
+<c- p>]</c->
+</pre>
+   <p>Note that the context is a normal JSON-LD context object. The entities are each represented as a single JSON-LD object. The entity id becomes the `@id` property.</p>
+   <p>The built in properties, recorded, deleted, are mapped into the core namespace; `http://data.mimiro.io/core/uda/` as `core:recorded` and `core:deleted`.</p>
+   <p>The entity references are encoded in the form of</p>
+<pre class="language-json highlight"><c- p>{</c->
+    <c- f>"@id"</c-> <c- p>:</c-> <c- u>"reference URI"</c->
+<c- p>}</c->
+</pre>
+   <p>The continuation token is represented as a JSON-LD object with the rdf type `core:continuation` and the token value as the `core:token` property.</p>
+   <h3 class="heading settled" data-level="9.1" id="json-ld-content-type"><span class="secno">9.1. </span><span class="content">JSON-LD Content Type</span><a class="self-link" href="#json-ld-content-type"></a></h3>
+   <p>The JSON-LD content type is `application/ld+json`. It should be used when the client is able to accept JSON-LD responses. It should be sent as an `Accept` header in the request.</p>
+   <p>The endpoints that support JSON-LD are:</p>
+   <ul>
+    <li data-md>
+     <p>`/datasets/{dataset}/changes`</p>
+    <li data-md>
+     <p>`/datasets/{dataset}/entities`</p>
+   </ul>
   </main>
   <div data-fill-with="conformance">
    <h2 class="no-ref no-num heading settled" id="conformance"><span class="content"> Conformance</span><a class="self-link" href="#conformance"></a></h2>
@@ -2466,13 +2561,13 @@ universal-data-api-full-sync-id : string
             However, for readability,
             these words do not appear in all uppercase letters in this specification. </p>
    <p> All of the text of this specification is normative
-            except sections explicitly marked as non-normative, examples, and notes. <a data-link-type="biblio" href="#biblio-rfc2119">[RFC2119]</a> </p>
+            except sections explicitly marked as non-normative, examples, and notes. <a data-link-type="biblio" href="#biblio-rfc2119" title="Key words for use in RFCs to Indicate Requirement Levels">[RFC2119]</a> </p>
    <p> Examples in this specification are introduced with the words “for example”
             or are set apart from the normative text with <code>class="example"</code>, like this: </p>
    <div class="example" id="example-example"><a class="self-link" href="#example-example"></a> This is an example of an informative example. </div>
    <p> Informative notes begin with the word “Note”
             and are set apart from the normative text with <code>class="note"</code>, like this: </p>
-   <p class="note" role="note"> Note, this is an informative note. </p>
+   <p class="note" role="note"> Note, this is an informative note.</p>
   </div>
 <script>
 (function() {

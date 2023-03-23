@@ -1269,7 +1269,7 @@ Possible extra rowspan handling
 	ul.index ul,
 	ul.index dl { font-size: smaller; }
 	@media not print {
-		ul.index li span:not(.dfn-paneled) {
+		ul.index li a + span {
 			white-space: nowrap;
 			color: transparent; }
 		ul.index li a:hover + span,
@@ -1487,10 +1487,9 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version bbc364800, updated Mon Nov 15 13:57:55 2021 -0800" name="generator">
+  <meta content="Bikeshed version 077497365, updated Thu Mar 2 15:15:29 2023 -0800" name="generator">
   <link href="https://open.mimiro.io/specifications/entity-graph-data-model" rel="canonical">
 <style>/* style-autolinks */
-
 .css.css, .property.property, .descriptor.descriptor {
     color: var(--a-normal-text);
     font-size: inherit;
@@ -1550,7 +1549,8 @@ pre .property::before, pre .property::after {
 
 [data-link-type=biblio] {
     white-space: pre;
-}</style>
+}
+</style>
 <style>/* style-colors */
 
 /* Any --*-text not paired with a --*-bg is assumed to have a transparent bg */
@@ -1659,9 +1659,9 @@ pre .property::before, pre .property::after {
     --outdated-shadow: red;
 
     --editedrec-bg: darkorange;
-}</style>
+}
+</style>
 <style>/* style-counters */
-
 body {
     counter-reset: example figure issue;
 }
@@ -1688,9 +1688,9 @@ figcaption {
 }
 figcaption:not(.no-marker)::before {
     content: "Figure " counter(figure) " ";
-}</style>
+}
+</style>
 <style>/* style-issues */
-
 a[href].issue-return {
     float: right;
     float: inline-end;
@@ -1700,7 +1700,6 @@ a[href].issue-return {
 }
 </style>
 <style>/* style-md-lists */
-
 /* This is a weird hack for me not yet following the commonmark spec
    regarding paragraph and lists. */
 [data-md] > :first-child {
@@ -1708,7 +1707,8 @@ a[href].issue-return {
 }
 [data-md] > :last-child {
     margin-bottom: 0;
-}</style>
+}
+</style>
 <style>/* style-selflinks */
 
 :root {
@@ -1735,6 +1735,14 @@ a.self-link:hover {
 }
 .heading > a.self-link {
     font-size: 83%;
+}
+.example > a.self-link,
+.note > a.self-link,
+.issue > a.self-link {
+    /* These blocks are overflow:auto, so positioning outside
+       doesn't work. */
+    left: auto;
+    right: 0;
 }
 li > a.self-link {
     left: calc(-1 * (3.5rem - 26px) - 2em);
@@ -1933,6 +1941,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
        which is quite common in practice... */
     img { background: white; }
 }
+
 @media (prefers-color-scheme: dark) {
     :root {
         --selflink-text: black;
@@ -2008,7 +2017,7 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Entity Graph Constraint Language</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Living Standard, <time class="dt-updated" datetime="2021-11-21">21 November 2021</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="profile-and-date"><span class="content">Living Standard, <time class="dt-updated" datetime="2023-03-09">9 March 2023</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>This version:
@@ -2172,24 +2181,24 @@ c-[il] { color: #000000 } /* Literal.Number.Integer.Long */
 <pre class="language-javascript highlight"><c- a>let</c-> datatype <c- o>=</c-> property_datatype<c- p>(</c->value<c- p>)</c->
 </pre>
    <p>Based on XML primitive datatypes the result will be a URI of one of the following:</p>
-<pre class="language-json highlight">h<c- kc>tt</c->p<c- p>:</c->//www.w<c- mf>3.</c->org/<c- mi>2001</c->/XMLSchema#i<c- kc>nt</c->
-h<c- kc>tt</c->p<c- p>:</c->//www.w<c- mf>3.</c->org/<c- mi>2001</c->/XMLSchema#dura<c- kc>t</c->io<c- kc>n</c->
-h<c- kc>tt</c->p<c- p>:</c->//www.w<c- mf>3.</c->org/<c- mi>2001</c->/XMLSchema#da<c- kc>te</c->Time
-h<c- kc>tt</c->p<c- p>:</c->//www.w<c- mf>3.</c->org/<c- mi>2001</c->/XMLSchema#<c- kc>t</c->ime
-h<c- kc>tt</c->p<c- p>:</c->//www.w<c- mf>3.</c->org/<c- mi>2001</c->/XMLSchema#da<c- kc>te</c->
-h<c- kc>tt</c->p<c- p>:</c->//www.w<c- mf>3.</c->org/<c- mi>2001</c->/XMLSchema#boolea<c- kc>n</c->
-h<c- kc>tt</c->p<c- p>:</c->//www.w<c- mf>3.</c->org/<c- mi>2001</c->/XMLSchema#base<c- mi>64</c->Bi<c- kc>nar</c->y
-h<c- kc>tt</c->p<c- p>:</c->//www.w<c- mf>3.</c->org/<c- mi>2001</c->/XMLSchema#hexBi<c- kc>nar</c->y
-h<c- kc>tt</c->p<c- p>:</c->//www.w<c- mf>3.</c->org/<c- mi>2001</c->/XMLSchema#<c- kc>fl</c->oa<c- kc>t</c->
-h<c- kc>tt</c->p<c- p>:</c->//www.w<c- mf>3.</c->org/<c- mi>2001</c->/XMLSchema#double
-h<c- kc>tt</c->p<c- p>:</c->//www.w<c- mf>3.</c->org/<c- mi>2001</c->/XMLSchema#decimal
-h<c- kc>tt</c->p<c- p>:</c->//www.w<c- mf>3.</c->org/<c- mi>2001</c->/XMLSchema#a<c- kc>n</c->yURI
-h<c- kc>tt</c->p<c- p>:</c->//www.w<c- mf>3.</c->org/<c- mi>2001</c->/XMLSchema#s<c- kc>tr</c->i<c- kc>n</c->g
-h<c- kc>tt</c->p<c- p>:</c->//www.w<c- mf>3.</c->org/<c- mi>2001</c->/XMLSchema#gYearMo<c- kc>nt</c->h
-h<c- kc>tt</c->p<c- p>:</c->//www.w<c- mf>3.</c->org/<c- mi>2001</c->/XMLSchema#gYear
-h<c- kc>tt</c->p<c- p>:</c->//www.w<c- mf>3.</c->org/<c- mi>2001</c->/XMLSchema#gMo<c- kc>nt</c->hDay
-h<c- kc>tt</c->p<c- p>:</c->//www.w<c- mf>3.</c->org/<c- mi>2001</c->/XMLSchema#gDay
-h<c- kc>tt</c->p<c- p>:</c->//www.w<c- mf>3.</c->org/<c- mi>2001</c->/XMLSchema#gMo<c- kc>nt</c->h
+<pre class="language-json highlight">h<c- kc>tt</c->p<c- p>:</c-><c- c1>//www.w3.org/2001/XMLSchema#int</c->
+h<c- kc>tt</c->p<c- p>:</c-><c- c1>//www.w3.org/2001/XMLSchema#duration</c->
+h<c- kc>tt</c->p<c- p>:</c-><c- c1>//www.w3.org/2001/XMLSchema#dateTime</c->
+h<c- kc>tt</c->p<c- p>:</c-><c- c1>//www.w3.org/2001/XMLSchema#time</c->
+h<c- kc>tt</c->p<c- p>:</c-><c- c1>//www.w3.org/2001/XMLSchema#date</c->
+h<c- kc>tt</c->p<c- p>:</c-><c- c1>//www.w3.org/2001/XMLSchema#boolean</c->
+h<c- kc>tt</c->p<c- p>:</c-><c- c1>//www.w3.org/2001/XMLSchema#base64Binary</c->
+h<c- kc>tt</c->p<c- p>:</c-><c- c1>//www.w3.org/2001/XMLSchema#hexBinary</c->
+h<c- kc>tt</c->p<c- p>:</c-><c- c1>//www.w3.org/2001/XMLSchema#float</c->
+h<c- kc>tt</c->p<c- p>:</c-><c- c1>//www.w3.org/2001/XMLSchema#double</c->
+h<c- kc>tt</c->p<c- p>:</c-><c- c1>//www.w3.org/2001/XMLSchema#decimal</c->
+h<c- kc>tt</c->p<c- p>:</c-><c- c1>//www.w3.org/2001/XMLSchema#anyURI</c->
+h<c- kc>tt</c->p<c- p>:</c-><c- c1>//www.w3.org/2001/XMLSchema#string</c->
+h<c- kc>tt</c->p<c- p>:</c-><c- c1>//www.w3.org/2001/XMLSchema#gYearMonth</c->
+h<c- kc>tt</c->p<c- p>:</c-><c- c1>//www.w3.org/2001/XMLSchema#gYear</c->
+h<c- kc>tt</c->p<c- p>:</c-><c- c1>//www.w3.org/2001/XMLSchema#gMonthDay</c->
+h<c- kc>tt</c->p<c- p>:</c-><c- c1>//www.w3.org/2001/XMLSchema#gDay</c->
+h<c- kc>tt</c->p<c- p>:</c-><c- c1>//www.w3.org/2001/XMLSchema#gMonth</c->
 </pre>
    <h2 class="heading settled" data-level="4" id="constraint-data-model-and-validation-semantics"><span class="secno">4. </span><span class="content">Constraint Data Model and Validation Semantics</span><a class="self-link" href="#constraint-data-model-and-validation-semantics"></a></h2>
    <p>Each constraint is defined in terms of a data model and an associated validation rule. The validation rule is generic and parameterised. The parameters to the validation rule are retreived from the instance of the constraint data model at run time. Note that the formalism for expressing the constraint is to convey unambiguously the intent of the constraint and not as an implementation specification.</p>
@@ -2251,7 +2260,7 @@ assert_true<c- p>(</c->instanceCount<c- p>,</c-> <c- mf>0</c-><c- p>)</c->
 <c- a>let</c-> instancesOfClass <c- o>=</c-> hop<c- p>(</c->$CLASS<c- p>,</c-> <c- u>"rdf:type"</c-><c- p>,</c-> <c- kc>true</c-><c- p>)</c->
 
 <c- c1>// for each instance of the specified class get the properties of the specified property class and assert the cardinailty meets the specified values. </c->
-<c- k>for</c-> entityInstance <c- k>in</c-> instancesOfClass <c- p>{</c->
+<c- k>for</c-> entityInstance <c- ow>in</c-> instancesOfClass <c- p>{</c->
     <c- a>let</c-> propertiesOfSpecifiedType <c- o>=</c-> properties<c- p>(</c->entityInstance<c- p>,</c-> $PROPERTY_CLASS<c- p>)</c->
     <c- a>let</c-> propertiesLength <c- o>=</c-> len<c- p>(</c->propertiesLength<c- p>)</c->
 
@@ -2272,7 +2281,7 @@ assert_true<c- p>(</c->instanceCount<c- p>,</c-> <c- mf>0</c-><c- p>)</c->
     <li data-md>
      <p>the reference class being constrained</p>
     <li data-md>
-     <p>the required class of the referenced</p>
+     <p>the class of the referenced entity</p>
     <li data-md>
      <p>the min cardinality of properties of the property class that are allowed on an instance</p>
     <li data-md>
@@ -2306,7 +2315,7 @@ assert_true<c- p>(</c->instanceCount<c- p>,</c-> <c- mf>0</c-><c- p>)</c->
 <c- a>let</c-> instancesOfClass <c- o>=</c-> hop<c- p>(</c->$CLASS<c- p>,</c-> <c- u>"rdf:type"</c-><c- p>,</c-> <c- kc>true</c-><c- p>)</c->
 
 <c- c1>// for each instance of the specified class get the properties of the specified reference class and assert the cardinailty meets the specified values </c->
-<c- k>for</c-> entityInstance <c- k>in</c-> instancesOfClass <c- p>{</c->
+<c- k>for</c-> entityInstance <c- ow>in</c-> instancesOfClass <c- p>{</c->
     <c- a>let</c-> references <c- o>=</c-> hop<c- p>(</c->entityInstance<c- p>,</c-> $REFERENCE_CLASS<c- p>)</c->
     <c- a>let</c-> referencesLength <c- o>=</c-> len<c- p>(</c->references<c- p>)</c->
 
@@ -2314,7 +2323,7 @@ assert_true<c- p>(</c->instanceCount<c- p>,</c-> <c- mf>0</c-><c- p>)</c->
     assert_true<c- p>(</c->propertiesLength <c- o>&lt;=</c-> $MAX_CARD<c- p>)</c->
 
     <c- c1>// check associated entity has type reference to correct class</c->
-    <c- k>for</c-> refvalue <c- k>in</c-> references <c- p>{</c->
+    <c- k>for</c-> refvalue <c- ow>in</c-> references <c- p>{</c->
         <c- c1>// get the related entity</c->
         relatedentity <c- o>=</c-> get_entity<c- p>(</c->refvalue<c- p>)</c->
 
@@ -2334,7 +2343,7 @@ assert_true<c- p>(</c->instanceCount<c- p>,</c-> <c- mf>0</c-><c- p>)</c->
 <c- c1>// for each instance of the specified referenced class get the referencees and check that the inverse reference cardinality is in the range of the min and max cardinality</c->
 <c- a>let</c-> instancesOfReferenceClass <c- o>=</c-> hop<c- p>(</c->$REFERENCED_ENTITY_CLASS<c- p>,</c-> <c- u>"rdf:type"</c-><c- p>,</c-> <c- kc>true</c-><c- p>)</c->
 
-<c- k>for</c-> entityInstance <c- k>in</c-> instancesOfReferenceClass <c- p>{</c->
+<c- k>for</c-> entityInstance <c- ow>in</c-> instancesOfReferenceClass <c- p>{</c->
     <c- a>let</c-> inverseReferences <c- o>=</c-> hop<c- p>(</c->entityInstance<c- p>,</c-> $REFERENCE_CLASS<c- p>,</c-> <c- kc>true</c-><c- p>)</c->
     <c- a>let</c-> inverseReferencesLength <c- o>=</c-> len<c- p>(</c->inverseReferences<c- p>)</c->
 
@@ -2376,11 +2385,11 @@ assert_true<c- p>(</c->instanceCount<c- p>,</c-> <c- mf>0</c-><c- p>)</c->
 <c- a>let</c-> instancesOfClass <c- o>=</c-> hop<c- p>(</c->$CLASS<c- p>,</c-> <c- u>"rdf:type"</c-><c- p>,</c-> <c- kc>true</c-><c- p>)</c->
 
 <c- c1>// for each instance of the specified class get the properties of the specified property class and assert all values of the constrained property type have a value that meets the value constraints.</c->
-<c- k>for</c-> entityInstance <c- k>in</c-> instancesOfClass <c- p>{</c->
+<c- k>for</c-> entityInstance <c- ow>in</c-> instancesOfClass <c- p>{</c->
     <c- a>let</c-> propertiesOfSpecifiedType <c- o>=</c-> properties<c- p>(</c->entityInstance<c- p>,</c-> $PROPERTY_CLASS<c- p>)</c->
     <c- a>let</c-> propertiesLength <c- o>=</c-> len<c- p>(</c->propertiesOfSpecifiedType<c- p>)</c->
 
-    <c- k>for</c-> value <c- k>in</c-> propertiesOfSpecifiedType <c- p>{</c->
+    <c- k>for</c-> value <c- ow>in</c-> propertiesOfSpecifiedType <c- p>{</c->
         <c- k>if</c-> <c- p>(</c->$VALUE_MIN<c- p>)</c-> <c- p>{</c->
             assert_gteq<c- p>(</c->value<c- p>,</c-> $VALUE_MIN<c- p>)</c->
         <c- p>}</c->
@@ -2414,8 +2423,8 @@ assert_true<c- p>(</c->instanceCount<c- p>,</c-> <c- mf>0</c-><c- p>)</c->
 </pre>
    <p>The formal semantics for this constraint class are defined in terms of the evaluation functions and bind the variable from the constraint instance as parameters.</p>
 <pre class="language-javascript highlight"><c- a>let</c-> entities <c- o>=</c-> query<c- p>(</c->$query<c- p>)</c->
-<c- k>for</c-> e <c- k>in</c-> entities <c- p>{</c->
-    <c- k>new</c-> ConstraintViolation<c- p>(</c->$CID<c- p>,</c-> e<c- p>)</c->
+<c- k>for</c-> e <c- ow>in</c-> entities <c- p>{</c->
+    <c- ow>new</c-> ConstraintViolation<c- p>(</c->$CID<c- p>,</c-> e<c- p>)</c->
 <c- p>}</c->
 </pre>
    <h3 class="heading settled" data-level="5.6" id="application-constraint"><span class="secno">5.6. </span><span class="content">Application Constraint</span><a class="self-link" href="#application-constraint"></a></h3>
@@ -2454,13 +2463,13 @@ assert_true<c- p>(</c->instanceCount<c- p>,</c-> <c- mf>0</c-><c- p>)</c->
             However, for readability,
             these words do not appear in all uppercase letters in this specification. </p>
    <p> All of the text of this specification is normative
-            except sections explicitly marked as non-normative, examples, and notes. <a data-link-type="biblio" href="#biblio-rfc2119">[RFC2119]</a> </p>
+            except sections explicitly marked as non-normative, examples, and notes. <a data-link-type="biblio" href="#biblio-rfc2119" title="Key words for use in RFCs to Indicate Requirement Levels">[RFC2119]</a> </p>
    <p> Examples in this specification are introduced with the words “for example”
             or are set apart from the normative text with <code>class="example"</code>, like this: </p>
    <div class="example" id="example-example"><a class="self-link" href="#example-example"></a> This is an example of an informative example. </div>
    <p> Informative notes begin with the word “Note”
             and are set apart from the normative text with <code>class="note"</code>, like this: </p>
-   <p class="note" role="note"> Note, this is an informative note. </p>
+   <p class="note" role="note"> Note, this is an informative note.</p>
   </div>
 <script>
 (function() {
