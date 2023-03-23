@@ -484,6 +484,39 @@ For a client to force a remote dataset to consider multiple requests as the full
 2. Send multiple requests containing entities and include the HTTP header `universal-data-api-full-sync-id`, whose value is the same as that sent in the first request.
 3. When all entities have been sent or the client knows that this is the last request; send the http headers `universal-data-api-full-sync-end` value `true`, and `universal-data-api-full-sync-id` with the same value as used in all previous requests.
 
+
+# Data Signatures
+
+A challenge when moving data between systems and organisations is the ability to verify that the data has not been tampered with. The Universal Data API supports the ability to sign data using a digital signature. 
+
+To support data signing, we introduce a new key that can be added to any entity. The key is called `signature`. The value of the key is a rich structure of the form shown below:
+
+```json
+{
+    "id" : "ns:graham",
+    "props" : {
+        "name" : "graham",
+        "title" : "mr",
+        "phone" : "+150050444"
+    },
+    "refs" : {
+        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" : "ns:person"
+    },
+    "signature" : {
+        "id" : true,
+        "props" : ["name", "title"],
+        "refs" : ["name", "title"],
+        "value" : "eyJhbGciOiJIUzI1NiJ9..VHVItCBCb8Q5CI-49imarDtJeSxH2uLU0DhqQP5Zjw4"
+    }
+}
+```
+
+The value of 'signature.value' is a digital signature of the entity. The signature is calculated by taking the values of the entity that correspond to the keys in the `signature.props` and `signature.refs` arrays, and the id if `signature.id`is true. The values are concatenated together, any complex contained entities in props are serialised in accordance with the canonical JSON representation. The resulting bytes are then signed. The signature is encoded as a base64 string and placed in the `signature.value` field. 
+
+If no values are provided for the `signature.keys` array then the entire entity is signed.
+
+The signing process follows the [JWS Clear Text JSON Signature Option](https://www.ietf.org/archive/id/draft-jordan-jws-ct-08.html) specification. Note that the only difference is that the data to be signed can be selected rather then the entire entity. This refinement allows for core properties to be signed whilst also allowing additional data to be added while in transit. 
+
 # Security
 
 All communication MUST be over TLS via https endpoints. 
