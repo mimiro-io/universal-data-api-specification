@@ -468,6 +468,8 @@ Example body:
 
 ```
 
+In some cases when a UDA instance receives a dataset update it may be too busy or overloaded to process the request. In these cases the server MAY return a 503 response code. The client SHOULD retry the request at a later time.
+
 To send a full sync requires the use of the following headers used in a specific way. The headers are:
 
 ```
