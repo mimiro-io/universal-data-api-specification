@@ -162,6 +162,14 @@ The `len` function takes an array as a parameter and returns the number of eleme
 let arraylength = len(property_value_array)
 ```
 
+### Id
+
+The `id` function takes an entity as a parameter and returns the URI of the entity.
+
+```javascript
+let entityid = id(e)
+```
+
 ### Property DataType
 
 The property data type function returns the data type from a property value. The values returned are as defined by the URIs for XML built in primitive datatypes (https://www.w3.org/TR/2004/REC-xmlschema-2-20041028/).
@@ -287,9 +295,11 @@ The data model for this constraint defines:
 - the class of the referenced entity
 - the min cardinality of properties of the property class that are allowed on an instance
 - the max cardinality of properties of the property class that are allowed on an instance
+- the optional oneof list that retricts the set of instances that can be referenced
 - the optional inverse reference class
 - the optional inverse min cardinality
 - the optional inverse max cardinality
+ 
 
 ```json
 {
@@ -300,6 +310,7 @@ The data model for this constraint defines:
         "egcl:referenceClass" : "$REFERENCE_CLASS",
         "egcl:referencedEntityClass" : "$REFERENCED_ENTITY_CLASS",
         "egcl:inverseReferenceClass" : "$INVERSE_REFERENCE_CLASS"
+        "egcl:oneOf" : "$ONE_OF"
     },
     "props" : {
         "egcl:minCard" : "$MIN_CARD",
@@ -328,18 +339,21 @@ for entityInstance in instancesOfClass {
     // check associated entity has type reference to correct class
     for refvalue in references {
         // get the related entity
-        relatedentity = get_entity(refvalue)
+        let relatedentity = get_entity(refvalue)
+
+        let entityId = id(relatedentity)
+        assert_true(contains($ONE_OF, entityId))
 
         // get all the classes for the related entity (this is a list of entities)
-        classes = get_classes(relatedentity)
+        let classes = get_classes(relatedentity)
 
         // get the constraining class that all referenced entities must be an instance of 
-        referenced_class = get_entity($REFERENCED_ENTITY_CLASS)
+        let referenced_class = get_entity($REFERENCED_ENTITY_CLASS)
 
         // check if the list of classes contains the required constraint class
         let isofclass = contains(classes, referenced_class)
 
-        assert(isofclass)
+        assert_true(isofclass)
     }
 }
 
