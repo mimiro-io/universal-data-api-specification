@@ -430,6 +430,19 @@ Clients can use the token in subsequent requests to page through results.
 GET /datasets/people/entities?from=xxxx-yyyyy
 ```
 
+### Lookup
+
+It is possible to lookup a single entity by its id using the entities endpoint. The request URL is in the form:
+
+```
+/datasets/{dataset_name}/entities?id={entity_id}
+```
+
+The entity_id is the full URI of the entity to lookup. It MUST be URL encoded.
+
+The response is a single entity JSON object. If the entity is not found the server MUST return a 404 Not Found response.
+
+
 ### POST
 
 It is also possible to POST changes to the entities endpoint. The changes can either be incremental or a full reload. 
